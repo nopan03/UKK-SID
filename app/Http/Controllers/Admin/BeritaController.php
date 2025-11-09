@@ -7,7 +7,7 @@ use App\Models\Berita;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage; // Penting untuk menghapus file
+use Illuminate\Support\Facades\Storage;
 
 class BeritaController extends Controller
 {
@@ -29,13 +29,16 @@ class BeritaController extends Controller
             'kategori' => 'required|string|max:100',
             'tanggal' => 'required|date',
             'isi' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // Saat membuat berita baru, gambar seharusnya wajib diisi
+            'gambar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        // Cara standar Laravel untuk menyimpan file.
+        // File akan disimpan di storage/app/public/berita-images
+        // dan path lengkapnya (folder + nama hash) akan dikembalikan.
         if ($request->hasFile('gambar')) {
-            $imageName = time().'.'.$request->gambar->extension();  
-            $request->gambar->storeAs('public/berita-images', $imageName);
-            $validatedData['gambar'] = $imageName;
+            $path = $request->file('gambar')->store('berita-images', 'public');
+            $validatedData['gambar'] = $path;
         }
 
         $validatedData['slug'] = Str::slug($request->judul, '-');
@@ -63,16 +66,19 @@ class BeritaController extends Controller
             'kategori' => 'required|string|max:100',
             'tanggal' => 'required|date',
             'isi' => 'required|string',
+            // Saat update, gambar boleh kosong (nullable)
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($request->hasFile('gambar')) {
-            if($berita->gambar) {
-                Storage::delete('public/berita-images/' . $berita->gambar);
+            // Hapus gambar lama, menggunakan path yang sudah tersimpan di database
+            if ($berita->gambar) {
+                Storage::disk('public')->delete($berita->gambar);
             }
-            $imageName = time().'.'.$request->gambar->extension();  
-            $request->gambar->storeAs('public/berita-images', $imageName);
-            $validatedData['gambar'] = $imageName;
+            
+            // Simpan gambar baru
+            $path = $request->file('gambar')->store('berita-images', 'public');
+            $validatedData['gambar'] = $path;
         }
 
         $validatedData['slug'] = Str::slug($request->judul, '-');
@@ -84,9 +90,12 @@ class BeritaController extends Controller
 
     public function destroy(Berita $berita)
     {
-        if($berita->gambar) {
-            Storage::delete('public/berita-images/' . $berita->gambar);
+        // Hapus gambar dari storage
+        if ($berita->gambar) {
+            Storage::disk('public')->delete($berita->gambar);
         }
+        
+        // Hapus record dari database
         $berita->delete();
 
         return redirect()->route('admin.berita.index')->with('success', 'Berita berhasil dihapus!');
