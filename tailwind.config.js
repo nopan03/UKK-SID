@@ -1,6 +1,5 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
-import typography from '@tailwindcss/typography'; // <-- 1. TAMBAHKAN BARIS INI
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -12,14 +11,17 @@ export default {
 
     theme: {
         extend: {
+            // ▼▼ TAMBAHKAN BLOK INI ▼▼
+            colors: {
+              'primary-yellow': '#FEF100', // Ini adalah kode HEX baru Anda
+            },
+            // ▲▲ SAMPAI SINI ▲▲
+
             fontFamily: {
-                sans: ['Poppins', ...defaultTheme.fontFamily.sans],
+                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
         },
     },
 
-    plugins: [
-        forms,
-        typography // <-- 2. TAMBAHKAN BARIS INI
-    ],
+    plugins: [forms],
 };

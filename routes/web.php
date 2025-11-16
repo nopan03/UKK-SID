@@ -54,6 +54,18 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
 });
 
+//Route untuk halaman sejarahRoute::get('/sejarah-desa', function () {
+Route::get('/sejarah-desa', function () {
+    return view('profil-desa.sejarah'); 
+})->name('sejarah');
+
+//Route untuk halaman visi dan misi
+Route::get('/visi-misi', function () {
+    return view('profil-desa.visimisi'); // Menunjuk ke file baru
+})->name('visimisi');
+
+
+
 // Rute untuk halaman profil pengguna
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
