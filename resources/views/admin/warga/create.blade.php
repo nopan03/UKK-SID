@@ -1,133 +1,141 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Tambah Data Warga Baru') }}
-        </h2>
-    </x-slot>
+@extends('layouts.admin') {{-- 1. GUNAKAN LAYOUT ADMIN --}}
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 md:p-8 text-gray-900">
-                    {{-- Form untuk menambahkan data baru --}}
-                    <form method="POST" action="{{ route('admin.warga.store') }}">
-                        @csrf
+@section('title', 'Tambah Data Warga Baru')
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {{-- Kolom NIK --}}
-                            <div>
-                                <x-input-label for="nik" :value="__('Nomor Induk Kependudukan (NIK)')" />
-                                <x-text-input id="nik" class="block mt-1 w-full" type="text" name="nik"
-                                    :value="old('nik')" required autofocus />
-                                <x-input-error :messages="$errors->get('nik')" class="mt-2" />
-                            </div>
+@section('content')
+<div class="container mx-auto px-4 py-6">
 
-                            {{-- Kolom Nama --}}
-                            <div>
-                                <x-input-label for="nama" :value="__('Nama Lengkap')" />
-                                <x-text-input id="nama" class="block mt-1 w-full" type="text" name="nama"
-                                    :value="old('nama')" required />
-                                <x-input-error :messages="$errors->get('nama')" class="mt-2" />
-                            </div>
+    {{-- HEADER HALAMAN --}}
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Tambah Warga Baru</h1>
+        <p class="text-sm text-gray-500">Masukkan data penduduk baru secara lengkap dan benar.</p>
+    </div>
 
-                            {{-- Kolom Tempat Lahir --}}
-                            <div>
-                                <x-input-label for="tempat_lahir" :value="__('Tempat Lahir')" />
-                                <x-text-input id="tempat_lahir" class="block mt-1 w-full" type="text"
-                                    name="tempat_lahir" :value="old('tempat_lahir')" required />
-                                <x-input-error :messages="$errors->get('tempat_lahir')" class="mt-2" />
-                            </div>
+    {{-- CARD FORM --}}
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="p-6 md:p-8">
+            
+            {{-- FORM START --}}
+            <form method="POST" action="{{ route('admin.warga.store') }}">
+                @csrf
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    {{-- Kolom NIK --}}
+                    <div>
+                        <label for="nik" class="block text-sm font-medium text-gray-700 mb-1">Nomor Induk Kependudukan (NIK)</label>
+                        <input type="text" id="nik" name="nik" value="{{ old('nik') }}" required autofocus
+                            placeholder="Contoh: 3515xxxxxxxxxxxx"
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                        @error('nik') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
 
-                            {{-- Kolom Tanggal Lahir --}}
-                            <div>
-                                <x-input-label for="tanggal_lahir" :value="__('Tanggal Lahir')" />
-                                <x-text-input id="tanggal_lahir" class="block mt-1 w-full" type="date"
-                                    name="tanggal_lahir" :value="old('tanggal_lahir')" required />
-                                <x-input-error :messages="$errors->get('tanggal_lahir')" class="mt-2" />
-                            </div>
+                    {{-- Kolom Nama --}}
+                    <div>
+                        <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required
+                            placeholder="Sesuai KTP"
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                        @error('nama') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
 
-                            {{-- Kolom Jenis Kelamin --}}
-                            <div>
-                                <x-input-label for="jenis_kelamin" :value="__('Jenis Kelamin')" />
-                                <select id="jenis_kelamin" name="jenis_kelamin"
-                                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                    <option value="L" @selected(old('jenis_kelamin') == 'L')>Laki-laki</option>
-                                    <option value="P" @selected(old('jenis_kelamin') == 'P')>Perempuan</option>
-                                </select>
-                                <x-input-error :messages="$errors->get('jenis_kelamin')" class="mt-2" />
-                            </div>
+                    {{-- Kolom Tempat Lahir --}}
+                    <div>
+                        <label for="tempat_lahir" class="block text-sm font-medium text-gray-700 mb-1">Tempat Lahir</label>
+                        <input type="text" id="tempat_lahir" name="tempat_lahir" value="{{ old('tempat_lahir') }}" required
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                        @error('tempat_lahir') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
 
-                            {{-- Kolom Agama --}}
-                            <div>
-                                <x-input-label for="agama" :value="__('Agama')" />
-                                <select id="agama" name="agama"
-                                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                    <option value="Islam" @selected(old('agama') == 'Islam')>Islam</option>
-                                    <option value="Kristen Protestan" @selected(old('agama') == 'Kristen Protestan')>Kristen Protestan
-                                    </option>
-                                    <option value="Kristen Katolik" @selected(old('agama') == 'Kristen Katolik')>Kristen Katolik
-                                    </option>
-                                    <option value="Hindu" @selected(old('agama') == 'Hindu')>Hindu</option>
-                                    <option value="Buddha" @selected(old('agama') == 'Buddha')>Buddha</option>
-                                    <option value="Khonghucu" @selected(old('agama') == 'Khonghucu')>Khonghucu</option>
-                                </select>
-                                <x-input-error :messages="$errors->get('agama')" class="mt-2" />
-                            </div>
+                    {{-- Kolom Tanggal Lahir --}}
+                    <div>
+                        <label for="tanggal_lahir" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
+                        <input type="date" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" required
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                        @error('tanggal_lahir') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
 
-                            {{-- Kolom Status Perkawinan --}}
-                            <div>
-                                <x-input-label for="status_perkawinan" :value="__('Status Perkawinan')" />
-                                <select id="status_perkawinan" name="status_perkawinan"
-                                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                    <option value="Belum Kawin" @selected(old('status_perkawinan') == 'Belum Kawin')>Belum Kawin</option>
-                                    <option value="Kawin" @selected(old('status_perkawinan') == 'Kawin')>Kawin</option>
-                                    <option value="Cerai Hidup" @selected(old('status_perkawinan') == 'Cerai Hidup')>Cerai Hidup</option>
-                                    <option value="Cerai Mati" @selected(old('status_perkawinan') == 'Cerai Mati')>Cerai Mati</option>
-                                </select>
-                                <x-input-error :messages="$errors->get('status_perkawinan')" class="mt-2" />
-                            </div>
+                    {{-- Kolom Jenis Kelamin --}}
+                    <div>
+                        <label for="jenis_kelamin" class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin</label>
+                        <select id="jenis_kelamin" name="jenis_kelamin" class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                            <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                            <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan</option>
+                        </select>
+                        @error('jenis_kelamin') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
 
-                            {{-- Kolom Pekerjaan --}}
-                            <div>
-                                <x-input-label for="pekerjaan" :value="__('Pekerjaan')" />
-                                <x-text-input id="pekerjaan" class="block mt-1 w-full" type="text" name="pekerjaan"
-                                    :value="old('pekerjaan')" required />
-                                <x-input-error :messages="$errors->get('pekerjaan')" class="mt-2" />
-                            </div>
+                    {{-- Kolom Agama --}}
+                    <div>
+                        <label for="agama" class="block text-sm font-medium text-gray-700 mb-1">Agama</label>
+                        <select id="agama" name="agama" class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                            <option value="Islam" {{ old('agama') == 'Islam' ? 'selected' : '' }}>Islam</option>
+                            <option value="Kristen Protestan" {{ old('agama') == 'Kristen Protestan' ? 'selected' : '' }}>Kristen Protestan</option>
+                            <option value="Kristen Katolik" {{ old('agama') == 'Kristen Katolik' ? 'selected' : '' }}>Kristen Katolik</option>
+                            <option value="Hindu" {{ old('agama') == 'Hindu' ? 'selected' : '' }}>Hindu</option>
+                            <option value="Buddha" {{ old('agama') == 'Buddha' ? 'selected' : '' }}>Buddha</option>
+                            <option value="Khonghucu" {{ old('agama') == 'Khonghucu' ? 'selected' : '' }}>Khonghucu</option>
+                        </select>
+                        @error('agama') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
 
-                            {{-- Kolom Status Hidup --}}
-                            <div class="md:col-span-2">
-                                <x-input-label for="status_hidup" :value="__('Status Hidup')" />
-                                <select id="status_hidup" name="status_hidup"
-                                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                    <option value="hidup" @selected(old('status_hidup') == 'hidup')>Hidup</option>
-                                    <option value="meninggal" @selected(old('status_hidup') == 'meninggal')>Meninggal</option>
-                                </select>
-                                <x-input-error :messages="$errors->get('status_hidup')" class="mt-2" />
-                            </div>
+                    {{-- Kolom Status Perkawinan --}}
+                    <div>
+                        <label for="status_perkawinan" class="block text-sm font-medium text-gray-700 mb-1">Status Perkawinan</label>
+                        <select id="status_perkawinan" name="status_perkawinan" class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                            <option value="Belum Kawin" {{ old('status_perkawinan') == 'Belum Kawin' ? 'selected' : '' }}>Belum Kawin</option>
+                            <option value="Kawin" {{ old('status_perkawinan') == 'Kawin' ? 'selected' : '' }}>Kawin</option>
+                            <option value="Cerai Hidup" {{ old('status_perkawinan') == 'Cerai Hidup' ? 'selected' : '' }}>Cerai Hidup</option>
+                            <option value="Cerai Mati" {{ old('status_perkawinan') == 'Cerai Mati' ? 'selected' : '' }}>Cerai Mati</option>
+                        </select>
+                    </div>
 
-                            {{-- Kolom Alamat --}}
-                            <div class="md:col-span-2">
-                                <x-input-label for="alamat" :value="__('Alamat')" />
-                                <textarea id="alamat" name="alamat"
-                                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('alamat') }}</textarea>
-                                <x-input-error :messages="$errors->get('alamat')" class="mt-2" />
-                            </div>
-                        </div>
+                    {{-- Kolom Pekerjaan --}}
+                    <div>
+                        <label for="pekerjaan" class="block text-sm font-medium text-gray-700 mb-1">Pekerjaan</label>
+                        <input type="text" id="pekerjaan" name="pekerjaan" value="{{ old('pekerjaan') }}" required
+                            placeholder="Contoh: Petani / Wiraswasta"
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                        @error('pekerjaan') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
 
-                        {{-- Tombol Simpan --}}
-                        <div class="flex items-center justify-end mt-6">
-                            <a href="{{ route('admin.dashboard') }}"
-                                class="text-sm text-gray-600 hover:text-gray-900 mr-4">
-                                Batal
-                            </a>
-                            <x-primary-button>
-                                {{ __('Simpan Data Warga') }}
-                            </x-primary-button>
-                        </div>
-                    </form>
+                    {{-- Kolom Status Hidup --}}
+                    <div class="md:col-span-2">
+                        <label for="status_hidup" class="block text-sm font-medium text-gray-700 mb-1">Status Hidup</label>
+                        <select id="status_hidup" name="status_hidup" class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                            <option value="hidup" {{ old('status_hidup') == 'hidup' ? 'selected' : '' }}>Hidup</option>
+                            <option value="meninggal" {{ old('status_hidup') == 'meninggal' ? 'selected' : '' }}>Meninggal</option>
+                        </select>
+                    </div>
+
+                    {{-- Kolom Alamat --}}
+                    <div class="md:col-span-2">
+                        <label for="alamat" class="block text-sm font-medium text-gray-700 mb-1">Alamat Lengkap</label>
+                        <textarea id="alamat" name="alamat" rows="3" required
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200"
+                            placeholder="Nama Jalan, RT/RW, Dusun">{{ old('alamat') }}</textarea>
+                        @error('alamat') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
                 </div>
-            </div>
+
+                {{-- TOMBOL AKSI --}}
+                <div class="flex items-center justify-end mt-8 border-t pt-6 space-x-4">
+                    {{-- 2. UBAH LINK BATAL: Arahkan ke Index Warga, bukan Dashboard --}}
+                    <a href="{{ route('admin.warga.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-semibold">
+                        Batal
+                    </a>
+                    
+                    <button type="submit" class="px-6 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition text-sm font-semibold shadow-md flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Simpan Data Warga
+                    </button>
+                </div>
+
+            </form>
+            {{-- FORM END --}}
+            
         </div>
     </div>
-</x-app-layout>
+</div>
+@endsection

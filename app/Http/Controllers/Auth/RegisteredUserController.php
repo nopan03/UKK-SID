@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Penduduk; // Pastikan nama model ini benar
+use App\Models\Penduduk; // Pastikan Model ini benar (Penduduk atau Biodata)
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,36 +29,40 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // 1. Sesuaikan Aturan Validasi
+        // 1. VALIDASI INPUT
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'nik' => ['required', 'string', 'digits:16', 'unique:'.User::class], // NIK harus unik di tabel users
+            'name' => ['required', 'string', 'max:255', 'unique:users,name'], 
+            'nik' => ['required', 'string', 'max:16', 'unique:users,nik'], 
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'name.unique' => 'Nama lengkap ini sudah memiliki akun.',
+            'nik.unique' => 'NIK ini sudah terdaftar sebagai akun pengguna. Silakan login saja.',
+            'email.unique' => 'Email ini sudah digunakan.',
         ]);
 
-        // Validasi tambahan: Cek NIK ke data master penduduk
-        $wargaExists = Penduduk::where('nik', $request->nik)->exists();
-        if (!$wargaExists) {
-            // Jika NIK tidak ada di master data, kembalikan dengan error
-            return back()->withErrors(['nik' => 'NIK yang Anda masukkan tidak terdaftar sebagai warga.'])->withInput();
+        // 2. CEK APAKAH NIK ADA DI DATA PENDUDUK (DASHBOARD ADMIN)
+        // Logika: Warga tidak bisa daftar jika NIK-nya belum diinput oleh Admin
+        $cekPenduduk = Penduduk::where('nik', $request->nik)->first();
+
+        if (!$cekPenduduk) {
+            // Jika NIK tidak ditemukan di tabel Penduduk
+            return back()->withErrors(['nik' => 'NIK Anda belum terdaftar di Data Desa. Silakan hubungi Admin Desa.'])->withInput();
         }
 
-        // 2. Sesuaikan Bagian Pembuatan User
+        // 3. SIMPAN USER BARU KE DATABASE (INI YANG TADI HILANG)
         $user = User::create([
             'name' => $request->name,
             'nik' => $request->nik,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            // Role akan otomatis terisi 'warga' dari nilai default di database.
+            'role' => 'warga', // Set default role sebagai warga
         ]);
 
+        // 4. TRIGGER EVENT REGISTERED
         event(new Registered($user));
 
-        // Setelah registrasi, user TIDAK otomatis login, tapi diarahkan ke halaman login
-        // Auth::login($user); // Baris ini kita non-aktifkan sesuai permintaan Anda
-
-        // Arahkan ke halaman login dengan pesan sukses
-        return redirect()->route('login')->with('status', 'Registrasi berhasil! Silakan login dengan NIK dan password Anda.');
+        // 5. ARAHKAN KE LOGIN
+       return redirect()->route('login')->with('status', 'Registrasi berhasil! Silakan login dengan Email dan password Anda.');
     }
 }

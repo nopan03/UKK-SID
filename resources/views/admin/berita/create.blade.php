@@ -1,78 +1,97 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Tulis Berita Baru') }}
-        </h2>
-    </x-slot>
+@extends('layouts.admin') {{-- 1. GUNAKAN LAYOUT ADMIN --}}
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 md:p-8 text-gray-900">
+@section('title', 'Tulis Berita Baru')
 
-                    {{-- enctype="multipart/form-data" WAJIB untuk form yang ada upload file --}}
-                    <form method="POST" action="{{ route('admin.berita.store') }}" enctype="multipart/form-data">
-                        @csrf
+@section('content')
+<div class="container mx-auto px-4 py-6">
 
-                        <div class="space-y-6">
-                            {{-- Judul --}}
-                            <div>
-                                <x-input-label for="judul" :value="__('Judul Berita')" />
-                                <x-text-input id="judul" class="block mt-1 w-full" type="text" name="judul"
-                                    :value="old('judul')" required autofocus />
-                                <x-input-error :messages="$errors->get('judul')" class="mt-2" />
-                            </div>
+    {{-- HEADER HALAMAN --}}
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Tulis Berita Baru</h1>
+        <p class="text-sm text-gray-500">Buat artikel, pengumuman, atau agenda kegiatan desa.</p>
+    </div>
 
-                            {{-- Kategori & Tanggal --}}
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <x-input-label for="kategori" :value="__('Kategori')" />
-                                    <x-text-input id="kategori" class="block mt-1 w-full" type="text"
-                                        name="kategori" :value="old('kategori')" required />
-                                    <x-input-error :messages="$errors->get('kategori')" class="mt-2" />
-                                </div>
-                                <div>
-                                    <x-input-label for="tanggal" :value="__('Tanggal Publikasi')" />
-                                    <x-text-input id="tanggal" class="block mt-1 w-full" type="date" name="tanggal"
-                                        :value="old('tanggal')" required />
-                                    <x-input-error :messages="$errors->get('tanggal')" class="mt-2" />
-                                </div>
-                            </div>
+    {{-- CARD FORM --}}
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="p-6 md:p-8">
 
-                            {{-- Upload Gambar --}}
-                            <div>
-                                <x-input-label for="gambar" :value="__('Gambar Utama (Opsional)')" />
-                                <input id="gambar"
-                                    class="block mt-1 w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                                    type="file" name="gambar">
-                                <p class="mt-1 text-sm text-gray-500">Tipe file: JPG, PNG, GIF. Maksimal 2MB.</p>
+            {{-- FORM START --}}
+            {{-- PENTING: enctype wajib ada untuk upload gambar --}}
+            <form method="POST" action="{{ route('admin.berita.store') }}" enctype="multipart/form-data">
+                @csrf
 
-                                {{-- PASTIKAN BARIS INI ADA --}}
-                                <x-input-error :messages="$errors->get('gambar')" class="mt-2" />
-                            </div>
+                <div class="grid grid-cols-1 gap-6">
 
-                            {{-- Isi Berita --}}
-                            <div>
-                                <x-input-label for="isi" :value="__('Isi Berita')" />
-                                <textarea id="isi" name="isi" rows="10"
-                                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('isi') }}</textarea>
-                                <x-input-error :messages="$errors->get('isi')" class="mt-2" />
-                            </div>
+                    {{-- Judul Berita --}}
+                    <div>
+                        <label for="judul" class="block text-sm font-medium text-gray-700 mb-1">Judul Berita</label>
+                        <input type="text" id="judul" name="judul" value="{{ old('judul') }}" required autofocus
+                            placeholder="Contoh: Jadwal Posyandu Balita"
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                        @error('judul') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Grid 2 Kolom untuk Kategori & Tanggal --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {{-- Kategori (Sebaiknya pakai Select agar seragam) --}}
+                        <div>
+                            <label for="kategori" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                            <select id="kategori" name="kategori" class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                                <option value="Berita Desa" {{ old('kategori') == 'Berita Desa' ? 'selected' : '' }}>Berita Desa</option>
+                                <option value="Pengumuman" {{ old('kategori') == 'Pengumuman' ? 'selected' : '' }}>Pengumuman</option>
+                                <option value="Agenda" {{ old('kategori') == 'Agenda' ? 'selected' : '' }}>Agenda Kegiatan</option>
+                                <option value="Potensi Desa" {{ old('kategori') == 'Potensi Desa' ? 'selected' : '' }}>Potensi Desa</option>
+                            </select>
+                            @error('kategori') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 
-                        {{-- Tombol Aksi --}}
-                        <div class="flex items-center justify-end mt-6">
-                            <a href="{{ route('admin.berita.index') }}"
-                                class="text-sm text-gray-600 hover:text-gray-900 mr-4">
-                                Batal
-                            </a>
-                            <x-primary-button>
-                                {{ __('Simpan Berita') }}
-                            </x-primary-button>
+                        {{-- Tanggal Publikasi --}}
+                        <div>
+                            <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Publikasi</label>
+                            <input type="date" id="tanggal" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" required
+                                class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                            @error('tanggal') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
-                    </form>
+                    </div>
+
+                    {{-- Upload Gambar --}}
+                    <div>
+                        <label for="gambar" class="block text-sm font-medium text-gray-700 mb-1">Gambar Utama (Opsional)</label>
+                        <input type="file" id="gambar" name="gambar" accept="image/*"
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 border border-gray-300 rounded-lg cursor-pointer">
+                        <p class="mt-1 text-xs text-gray-500">Format: JPG, PNG, GIF. Maksimal 2MB.</p>
+                        @error('gambar') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Isi Berita --}}
+                    <div>
+                        <label for="isi" class="block text-sm font-medium text-gray-700 mb-1">Isi Berita</label>
+                        <textarea id="isi" name="isi" rows="10" required
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200"
+                            placeholder="Tuliskan isi berita lengkap di sini...">{{ old('isi') }}</textarea>
+                        @error('isi') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
                 </div>
-            </div>
+
+                {{-- TOMBOL AKSI --}}
+                <div class="flex items-center justify-end mt-8 border-t pt-6 space-x-4">
+                    {{-- Tombol Batal --}}
+                    <a href="{{ route('admin.berita.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-semibold">
+                        Batal
+                    </a>
+                    
+                    {{-- Tombol Simpan --}}
+                    <button type="submit" class="px-6 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition text-sm font-semibold shadow-md flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                        Terbitkan Berita
+                    </button>
+                </div>
+
+            </form>
+            {{-- FORM END --}}
+
         </div>
     </div>
-</x-app-layout>
+</div>
+@endsection

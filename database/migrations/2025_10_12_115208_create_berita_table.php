@@ -10,18 +10,22 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('berita', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->string('judul');
-            $table->text('isi')->nullable();
-            $table->string('kategori')->nullable();
-            $table->date('tanggal')->nullable();
-            $table->integer('user_id')->nullable()->index('user_id');
-            $table->dateTime('created_at')->nullable()->useCurrent();
-            $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
-        });
-    }
+{
+    Schema::create('berita', function (Blueprint $table) {
+        $table->id();
+        $table->string('judul');
+        $table->text('isi')->nullable();
+        $table->string('kategori')->nullable();
+        $table->date('tanggal')->nullable();
+        
+        // ▼▼ PASTIKAN BARIS INI SEPERTI INI ▼▼
+        // Gunakan unsignedBigInteger agar cocok dengan tabel Users, 
+        // tapi JANGAN tambahkan ->foreign(...) dulu biar aman.
+        $table->unsignedBigInteger('user_id')->nullable(); 
+        
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.

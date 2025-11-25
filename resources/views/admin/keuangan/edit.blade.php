@@ -1,63 +1,90 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Edit Transaksi') }}
-        </h2>
-    </x-slot>
+@extends('layouts.admin') {{-- 1. GUNAKAN LAYOUT ADMIN --}}
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <form method="POST" action="{{ route('admin.keuangan.update', $keuangan->id) }}">
-                        @csrf
-                        @method('PUT') {{-- PENTING untuk update --}}
+@section('title', 'Edit Transaksi')
 
-                        <div>
-                            <x-input-label for="tanggal" :value="__('Tanggal Transaksi')" />
-                            {{-- Mengisi value dengan data lama --}}
-                            <x-text-input id="tanggal" class="block mt-1 w-full" type="date" name="tanggal" :value="old('tanggal', $keuangan->tanggal)" required />
-                            <x-input-error :messages="$errors->get('tanggal')" class="mt-2" />
-                        </div>
+@section('content')
+<div class="container mx-auto px-4 py-6">
 
-                        <div class="mt-4">
-                            <x-input-label for="kategori" :value="__('Kategori')" />
-                            <x-text-input id="kategori" class="block mt-1 w-full" type="text" name="kategori" :value="old('kategori', $keuangan->kategori)" required />
-                            <x-input-error :messages="$errors->get('kategori')" class="mt-2" />
-                        </div>
+    {{-- HEADER HALAMAN --}}
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Edit Transaksi</h1>
+        <p class="text-sm text-gray-500">Perbarui detail transaksi keuangan.</p>
+    </div>
 
-                        <div class="mt-4">
-                            <x-input-label for="keterangan" :value="__('Keterangan')" />
-                            <textarea id="keterangan" name="keterangan" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="3" required>{{ old('keterangan', $keuangan->keterangan) }}</textarea>
-                            <x-input-error :messages="$errors->get('keterangan')" class="mt-2" />
-                        </div>
+    {{-- CARD FORM --}}
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="p-6 md:p-8">
 
-                        <div class="mt-4">
-                            <x-input-label for="jenis" :value="__('Jenis Transaksi')" />
-                            <select id="jenis" name="jenis" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                <option value="pemasukan" {{ old('jenis', $keuangan->jenis) == 'pemasukan' ? 'selected' : '' }}>Pemasukan</option>
-                                <option value="pengeluaran" {{ old('jenis', $keuangan->jenis) == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('jenis')" class="mt-2" />
-                        </div>
-                        
-                        <div class="mt-4">
-                            <x-input-label for="jumlah" :value="__('Jumlah (Rp)')" />
-                            <x-text-input id="jumlah" class="block mt-1 w-full" type="number" name="jumlah" :value="old('jumlah', $keuangan->jumlah)" required />
-                            <x-input-error :messages="$errors->get('jumlah')" class="mt-2" />
-                        </div>
+            {{-- FORM START --}}
+            <form method="POST" action="{{ route('admin.keuangan.update', $keuangan->id) }}">
+                @csrf
+                @method('PUT') {{-- Wajib untuk Update Data --}}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <div class="flex items-center justify-end mt-6">
-                            <a href="{{ route('admin.keuangan.index') }}" class="text-sm text-gray-600 hover:text-gray-900 mr-4">
-                                Batal
-                            </a>
-                            <x-primary-button>
-                                {{ __('Perbarui Transaksi') }}
-                            </x-primary-button>
-                        </div>
-                    </form>
+                    {{-- Tanggal --}}
+                    <div>
+                        <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Transaksi</label>
+                        <input type="date" id="tanggal" name="tanggal" value="{{ old('tanggal', $keuangan->tanggal) }}" required
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                        @error('tanggal') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Kategori (Input Text) --}}
+                    <div>
+                        <label for="kategori" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                        <input type="text" id="kategori" name="kategori" value="{{ old('kategori', $keuangan->kategori) }}" required
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                        @error('kategori') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Jenis Transaksi --}}
+                    <div>
+                        <label for="jenis" class="block text-sm font-medium text-gray-700 mb-1">Jenis Transaksi</label>
+                        <select id="jenis" name="jenis" required
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                            <option value="pemasukan" {{ old('jenis', $keuangan->jenis) == 'pemasukan' ? 'selected' : '' }}>Pemasukan</option>
+                            <option value="pengeluaran" {{ old('jenis', $keuangan->jenis) == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
+                        </select>
+                        @error('jenis') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Jumlah / Nominal --}}
+                    <div>
+                        <label for="jumlah" class="block text-sm font-medium text-gray-700 mb-1">Jumlah (Rp)</label>
+                        <input type="number" id="jumlah" name="jumlah" value="{{ old('jumlah', $keuangan->jumlah) }}" required min="0"
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
+                        @error('jumlah') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Keterangan (Full Width) --}}
+                    <div class="md:col-span-2">
+                        <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan / Uraian</label>
+                        <textarea id="keterangan" name="keterangan" rows="3" required
+                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">{{ old('keterangan', $keuangan->keterangan) }}</textarea>
+                        @error('keterangan') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
                 </div>
-            </div>
+
+                {{-- TOMBOL AKSI --}}
+                <div class="flex items-center justify-end mt-8 border-t pt-6 space-x-4">
+                    {{-- Tombol Batal --}}
+                    <a href="{{ route('admin.keuangan.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-semibold">
+                        Batal
+                    </a>
+                    
+                    {{-- Tombol Simpan --}}
+                    <button type="submit" class="px-6 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition text-sm font-semibold shadow-md flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        Simpan Perubahan
+                    </button>
+                </div>
+
+            </form>
+            {{-- FORM END --}}
+
         </div>
     </div>
-</x-app-layout>
+</div>
+@endsection

@@ -25,5 +25,6 @@
     {{-- (Saya asumsikan Anda punya file footer. Jika belum, baris ini bisa dihapus) --}}
     @include('landing.partials._footer') 
 
+    @stack('scripts')
 </body>
 </html>

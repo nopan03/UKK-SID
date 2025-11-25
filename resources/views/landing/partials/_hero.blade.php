@@ -1,4 +1,4 @@
-<section class="relative min-h-screen">
+<section class="relative min-h-screen flex items-center">
     
     {{-- Background Image & Overlay --}}
     <div class="absolute inset-0">
@@ -6,14 +6,17 @@
         <div class="absolute inset-0 bg-black opacity-60"></div>
     </div>
 
-    {{-- Wrapper Konten Utama (dengan pt-40) --}}
-    <div class="relative z-10 container mx-auto px-6 
-                flex flex-col min-h-screen justify-between 
-                pt-40 pb-20"> 
+    {{-- Wrapper Utama --}}
+    <div class="relative z-10 container mx-auto px-6">
         
-        <div class="text-center md:pl-35">
+        {{-- 
+           PERUBAHAN POSISI:
+           - md:pl-20: Sebelumnya 40. Saya kurangi jadi 20 agar konten 
+             geser KEMBALI KE KIRI (mendekat ke logo).
+        --}}
+        <div class="text-center md:pl-20">
         
-            {{-- BAGIAN TEKS "SELAMAT DATANG" --}}
+            {{-- BAGIAN TEKS --}}
             <div class="text-white">
                 <h1 class="text-4xl md:text-6xl font-light leading-tight mb-4">
                     Selamat Datang di Website
@@ -26,11 +29,10 @@
                 </p>
             </div>
 
-            {{-- BAGIAN IKON LAYANAN --}}
+            {{-- BAGIAN IKON --}}
             <div class="mt-16">
                 <div class="grid grid-cols-3 gap-4 max-w-xl mx-auto">
                     
-                    {{-- LAYANAN 1: ADMINISTRASI SURAT --}}
                     <a href="#" class="text-center text-white group">
                         <div class="flex items-center justify-center h-20 w-20 md:h-24 md:w-24 mx-auto mb-3
                                      transform transition-transform duration-300 group-hover:scale-110">
@@ -41,7 +43,6 @@
                         </h3>
                     </a>
 
-                    {{-- LAYANAN 2: LAPOR KELUHAN --}}
                     <a href="#" class="text-center text-white group">
                         <div class="flex items-center justify-center h-20 w-20 md:h-24 md:w-24 mx-auto mb-3
                                      transform transition-transform duration-300 group-hover:scale-110">
@@ -52,7 +53,6 @@
                         </h3>
                     </a>
 
-                    {{-- LAYANAN 3: INFOGRAFIS DESA --}}
                     <a href="#" class="text-center text-white group">
                         <div class="flex items-center justify-center h-20 w-20 md:h-24 md:w-24 mx-auto mb-3
                                      transform transition-transform duration-300 group-hover:scale-110">
@@ -67,7 +67,5 @@
             </div>
 
         </div> 
-        {{-- ▲▲ Akhir dari Wrapper Responsif --}}
-
     </div>
 </section>
