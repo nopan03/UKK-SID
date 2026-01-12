@@ -7,14 +7,8 @@
     </div>
 
     {{-- Wrapper Utama --}}
-    <div class="relative z-10 container mx-auto px-6">
-        
-        {{-- 
-           PERUBAHAN POSISI:
-           - md:pl-20: Sebelumnya 40. Saya kurangi jadi 20 agar konten 
-             geser KEMBALI KE KIRI (mendekat ke logo).
-        --}}
-        <div class="text-center md:pl-20">
+    <div class="relative z-10 container mx-auto px-5">
+        <div class="text-center md:-ml-5"> 
         
             {{-- BAGIAN TEKS --}}
             <div class="text-white">
@@ -33,7 +27,8 @@
             <div class="mt-16">
                 <div class="grid grid-cols-3 gap-4 max-w-xl mx-auto">
                     
-                    <a href="#" class="text-center text-white group">
+                    {{-- Administrasi Surat --}}
+                    <a href="{{ route('surat.index') }}" class="text-center text-white group">
                         <div class="flex items-center justify-center h-20 w-20 md:h-24 md:w-24 mx-auto mb-3
                                      transform transition-transform duration-300 group-hover:scale-110">
                             <i class="ti ti-file-text text-primary-yellow text-5xl md:text-6xl"></i>
@@ -43,7 +38,8 @@
                         </h3>
                     </a>
 
-                    <a href="#" class="text-center text-white group">
+                    {{-- Lapor Keluhan --}}
+                    <a href="{{ route('keluhan.create') }}" class="text-center text-white group">
                         <div class="flex items-center justify-center h-20 w-20 md:h-24 md:w-24 mx-auto mb-3
                                      transform transition-transform duration-300 group-hover:scale-110">
                             <i class="ti ti-speakerphone text-primary-yellow text-5xl md:text-6xl"></i>
@@ -53,7 +49,8 @@
                         </h3>
                     </a>
 
-                    <a href="#" class="text-center text-white group">
+                    {{-- Infografis Desa --}}
+                    <a href="{{ route('infografis.penduduk') }}" class="text-center text-white group">
                         <div class="flex items-center justify-center h-20 w-20 md:h-24 md:w-24 mx-auto mb-3
                                      transform transition-transform duration-300 group-hover:scale-110">
                             <i class="ti ti-chart-pie text-primary-yellow text-5xl md:text-6xl"></i>

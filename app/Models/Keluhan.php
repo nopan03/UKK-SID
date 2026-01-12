@@ -9,15 +9,18 @@ class Keluhan extends Model
 {
     use HasFactory;
 
-    // 1. KUNCI TABEL: Karena nama tabel Anda 'keluhan' (bukan keluhans)
     protected $table = 'keluhan';
 
-    // 2. IZINKAN KOLOM: Daftar kolom yang boleh diisi data
     protected $fillable = [
-        'nama_pelapor',
-        'judul_laporan',
-        'isi_laporan',
-        'foto_bukti',
-        'status'
+        'user_id',      // Sesuai gambar DB
+        'judul',        // Sesuai gambar DB
+        'isi',          // Sesuai gambar DB
+        'foto_bukti',   // Sesuai gambar DB
+        'status',       // Sesuai gambar DB
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

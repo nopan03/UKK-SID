@@ -9,23 +9,20 @@ class KeuanganDesa extends Model
 {
     use HasFactory;
 
-    // Menentukan nama tabel secara eksplisit (praktik yang baik)
+    // 1. Pastikan nama tabel benar
     protected $table = 'keuangan_desa';
 
-    // Kolom-kolom yang boleh diisi secara massal
+    // 2. Pastikan nama kolom SESUAI dengan gambar phpMyAdmin Anda
     protected $fillable = [
-        'tanggal',
-        'kategori',
-        'keterangan',
-        'jenis',
-        'jumlah',
         'user_id',
+        'jenis',      // enum('pemasukan', 'pengeluaran')
+        'kategori',
+        'jumlah',     // PENTING: Namanya 'jumlah', bukan 'nominal'
+        'keterangan',
+        'tanggal',
     ];
 
-    /**
-     * Mendefinisikan relasi ke tabel User.
-     * Satu transaksi dimiliki oleh satu User (admin).
-     */
+    // Relasi ke User (Admin yang input)
     public function user()
     {
         return $this->belongsTo(User::class);

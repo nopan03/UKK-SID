@@ -1,29 +1,26 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
-        </h2>
+        <div class="bg-green-700 py-6 -mx-6 -mt-6 px-6 text-white">
+            <h1 class="text-2xl md:text-3xl font-bold mb-1">Pengaturan Profil</h1>
+            <p class="text-green-100 text-sm">Kelola informasi akun dan biodata Anda.</p>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
-                </div>
-            </div>
+    <div class="py-6 bg-gray-50 min-h-screen">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
-            </div>
+            {{-- BIODATA LENGKAP (READONLY) --}}
+            @include('profile.partials.show-biodata-information', ['user' => $user])
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
-                </div>
-            </div>
+            {{-- FORM INFORMASI AKUN (nama + email) --}}
+            @include('profile.partials.update-profile-information-form', ['user' => $user])
+
+            {{-- GANTI PASSWORD --}}
+            @include('profile.partials.update-password-form')
+
+            {{-- HAPUS AKUN --}}
+            @include('profile.partials.delete-user-form')
+
         </div>
     </div>
 </x-app-layout>

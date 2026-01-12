@@ -20,9 +20,6 @@
                     {{-- Area Teks (Prose) --}}
                     <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed">
                         
-                        {{-- Ganti dengan foto yang relevan (misal: 'img/balai_desa.jpg') --}}
-                        <img src="{{ asset('img/placeholder_visimisi.jpg') }}" alt="Ilustrasi Visi Misi Desa Suruh" class="rounded-lg mb-6 w-full object-cover h-64 md:h-80 shadow-md">
-                        
                         {{-- ============ KONTEN VISI ANDA ============ --}}
                         <h2 class="text-primary-yellow">VISI DESA SURUH</h2>
                         

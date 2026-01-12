@@ -13,10 +13,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     {{-- 
-       PERBAIKAN:
-       1. Hapus 'h-screen' -> Ganti 'min-h-screen' (Biar bisa discroll kalau layar pendek).
-       2. Hapus 'overflow-hidden' (Izinkan scroll).
-       3. Tambah 'py-12' (Jarak aman atas-bawah).
+       guest.blade.php ini berfungsi untuk mengatur layout halaman untuk login (gerbang masuk pengguna)
     --}}
     <body class="font-sans text-gray-900 antialiased min-h-screen bg-green-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         

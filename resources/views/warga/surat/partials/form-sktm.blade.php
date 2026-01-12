@@ -1,10 +1,10 @@
 <div class="space-y-6">
     
     {{-- Keperluan --}}
-    <div>
+    {{-- <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Keperluan <span class="text-red-500">*</span></label>
         <textarea name="keperluan" rows="3" required class="w-full border-gray-300 rounded-lg focus:ring-green-500">{{ old('keperluan') }}</textarea>
-    </div>
+    </div> --}}
 
     {{-- Data Tambahan --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -13,7 +13,7 @@
             <input type="number" name="penghasilan" class="w-full border-gray-300 rounded-lg focus:ring-green-500">
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Jml Tanggungan</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Tanggungan</label>
             <input type="number" name="tanggungan" class="w-full border-gray-300 rounded-lg focus:ring-green-500">
         </div>
     </div>

@@ -19,7 +19,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Surat Keterangan Kematian (RS/Dokter)</label>
             <input type="file" name="file_ket_kematian" accept=".jpg,.jpeg,.png,.pdf" 
-                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 border border-gray-300 rounded-lg">
+                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-gray-300 border border-gray-300 rounded-lg">
             <p class="text-xs text-gray-500 mt-1">Jika meninggal di Rumah Sakit.</p>
         </div>
 
@@ -27,14 +27,14 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">KTP Almarhum <span class="text-red-500">*</span></label>
             <input type="file" name="file_ktp_almarhum" required accept=".jpg,.jpeg,.png,.pdf" 
-                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 border border-gray-300 rounded-lg">
+                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-gray-300 border border-gray-300 rounded-lg">
         </div>
 
         {{-- KK Almarhum --}}
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">KK Almarhum <span class="text-red-500">*</span></label>
             <input type="file" name="file_kk_almarhum" required accept=".jpg,.jpeg,.png,.pdf" 
-                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 border border-gray-300 rounded-lg">
+                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-gray-300 border border-gray-300 rounded-lg">
         </div>
     </div>
 </div>

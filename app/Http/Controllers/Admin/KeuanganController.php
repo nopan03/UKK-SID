@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\KeuanganDesa;
+use App\Models\LogAktivitas; // 🔥 IMPORT MODEL LOG
 use Illuminate\Http\Request;
 
 class KeuanganController extends Controller
@@ -35,16 +36,21 @@ class KeuanganController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'tanggal' => 'required|date',
-            'kategori' => 'required|string|max:255',
+            'tanggal'    => 'required|date',
+            'kategori'   => 'required|string|max:255',
             'keterangan' => 'required|string',
-            'jenis' => 'required|in:pemasukan,pengeluaran',
-            'jumlah' => 'required|numeric|min:0',
+            'jenis'      => 'required|in:pemasukan,pengeluaran',
+            'jumlah'     => 'required|numeric|min:0',
         ]);
 
         $validatedData['user_id'] = auth()->id();
 
         KeuanganDesa::create($validatedData);
+
+        $rupiah = number_format($request->jumlah, 0, ',', '.');
+        $jenis  = ucfirst($request->jenis); // Jadi "Pemasukan" atau "Pengeluaran"
+        
+        LogAktivitas::catat("Input Keuangan ($jenis): Rp $rupiah - $request->keterangan");
 
         return redirect()->route('admin.keuangan.index')->with('success', 'Transaksi berhasil ditambahkan.');
     }
@@ -52,7 +58,7 @@ class KeuanganController extends Controller
     /**
      * Menampilkan form untuk mengedit transaksi.
      */
-    public function edit(KeuanganDesa $keuangan) // Menggunakan Route Model Binding
+    public function edit(KeuanganDesa $keuangan)
     {
         return view('admin.keuangan.edit', compact('keuangan'));
     }
@@ -63,14 +69,22 @@ class KeuanganController extends Controller
     public function update(Request $request, KeuanganDesa $keuangan)
     {
         $validatedData = $request->validate([
-            'tanggal' => 'required|date',
-            'kategori' => 'required|string|max:255',
+            'tanggal'    => 'required|date',
+            'kategori'   => 'required|string|max:255',
             'keterangan' => 'required|string',
-            'jenis' => 'required|in:pemasukan,pengeluaran',
-            'jumlah' => 'required|numeric|min:0',
+            'jenis'      => 'required|in:pemasukan,pengeluaran',
+            'jumlah'     => 'required|numeric|min:0',
         ]);
 
+        // Simpan data lama buat perbandingan (Opsional, tapi bagus)
+        // $jumlahLama = number_format($keuangan->jumlah, 0, ',', '.');
+
         $keuangan->update($validatedData);
+
+        $rupiahBaru = number_format($keuangan->jumlah, 0, ',', '.');
+        $jenis      = ucfirst($keuangan->jenis);
+
+        LogAktivitas::catat("Mengedit Data Keuangan ($jenis): Menjadi Rp $rupiahBaru - $keuangan->keterangan");
 
         return redirect()->route('admin.keuangan.index')->with('success', 'Transaksi berhasil diperbarui.');
     }
@@ -80,7 +94,12 @@ class KeuanganController extends Controller
      */
     public function destroy(KeuanganDesa $keuangan)
     {
+        // Simpan info penting sebelum dihapus agar bisa dicatat
+        $infoLog = ucfirst($keuangan->jenis) . " sebesar Rp " . number_format($keuangan->jumlah, 0, ',', '.') . " ($keuangan->keterangan)";
+
         $keuangan->delete();
+        LogAktivitas::catat("Menghapus Data Keuangan: $infoLog");
+
         return redirect()->route('admin.keuangan.index')->with('success', 'Transaksi berhasil dihapus.');
     }
 }

@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class SuratKeteranganPindah extends Model
 {
-    protected $table = 'surat_keterangan_pindah'; // Sesuaikan nama tabel
-    protected $guarded = ['id'];
+    protected $table = 'surat_keterangan_pindah';
+    
+    // IZINKAN SEMUA KOLOM DIISI
+    protected $guarded = [];
 
     public function surat()
     {

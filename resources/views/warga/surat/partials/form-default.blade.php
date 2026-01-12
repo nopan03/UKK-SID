@@ -4,7 +4,7 @@
         <div class="flex">
             <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                 </svg>
             </div>
             <div class="ml-3">
@@ -15,12 +15,6 @@
         </div>
     </div>
 
-    {{-- Input Standar: Keperluan --}}
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Keperluan Surat <span class="text-red-500">*</span></label>
-        <textarea name="keperluan" rows="4" required 
-            placeholder="Jelaskan secara detail keperluan pembuatan surat ini..."
-            class="w-full border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 transition duration-200">{{ old('keperluan') }}</textarea>
-    </div>
-
+    {{-- Tidak ada field "keperluan" lagi di sini.
+         Keperluan sudah ada di form utama (create.blade.php). --}}
 </div>

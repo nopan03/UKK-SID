@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class SuratPengantarNikah extends Model
 {
-    protected $table = 'surat_pengantar_nikah'; // Sesuaikan nama tabel
-    protected $guarded = ['id'];
+    protected $table = 'surat_pengantar_nikah';
+    
+    // IZINKAN SEMUA KOLOM DIISI
+    protected $guarded = [];
 
     public function surat()
     {

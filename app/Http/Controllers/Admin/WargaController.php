@@ -3,23 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Penduduk; // Pastikan Model ini benar
+use App\Models\Penduduk; // Model untuk tabel biodata/penduduk
+use App\Models\User; // Model untuk tabel users
+use App\Models\Surat; // Model untuk tabel surat
+use App\Models\LogAktivitas; // Model untuk logging aktivitas
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB; // <- penting untuk DB::table()
 
 class WargaController extends Controller
 {
     /**
-     * MENAMPILKAN DAFTAR WARGA (Fungsi yang tadi hilang)
+     * MENAMPILKAN DAFTAR WARGA
      */
     public function index()
     {
-        // 1. Ambil semua data dari tabel (Model Penduduk)
-        // Menggunakan paginate(10) agar kalau datanya ribuan tidak berat (halaman terbagi)
-        $warga = Penduduk::paginate(10); 
-        
-        // 2. Tampilkan ke View index
-        // Pastikan Anda punya file: resources/views/admin/warga/index.blade.php
+        // paginate(10) supaya kalau data banyak tetap ringan
+        $warga = Penduduk::paginate(10);
+
         return view('admin.warga.index', compact('warga'));
     }
 
@@ -37,29 +38,32 @@ class WargaController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'nik' => 'required|string|digits:16|unique:biodata,nik', // Pastikan nama tabelnya 'biodata' sesuai database
-            'nama' => 'required|string|max:255',
-            'tempat_lahir' => 'required|string|max:255',
-            'tanggal_lahir' => 'required|date',
-            'jenis_kelamin' => 'required|in:L,P',
-            'alamat' => 'required|string',
-            'agama' => 'required|string',
+            'nik'               => 'required|string|digits:16|unique:biodata,nik',
+            'nama'              => 'required|string|max:255',
+            'tempat_lahir'      => 'required|string|max:255',
+            'tanggal_lahir'     => 'required|date',
+            'jenis_kelamin'     => 'required|in:L,P',
+            'alamat'            => 'required|string',
+            'agama'             => 'required|string',
             'status_perkawinan' => 'required|string',
-            'pekerjaan' => 'required|string',
-            'status_hidup' => 'required|in:hidup,meninggal',
-            'pendidikan' => 'nullable|string',
+            'pekerjaan'         => 'required|string',
+            'status_hidup'      => 'required|in:hidup,meninggal',
+            'pendidikan'        => 'nullable|string',
         ]);
 
-        Penduduk::create($validatedData);
+        $warga = Penduduk::create($validatedData);
+        LogAktivitas::catat("Menambahkan data warga baru: {$warga->nama} (NIK: {$warga->nik})");
 
-        // Redirect ke index (daftar warga), bukan dashboard, agar admin bisa lihat data yang baru masuk
-        return redirect()->route('admin.warga.index')->with('success', 'Data warga berhasil ditambahkan!');
+        return redirect()
+            ->route('admin.warga.index')
+            ->with('success', 'Data warga berhasil ditambahkan!');
     }
 
     /**
      * Menampilkan detail data seorang warga.
+     * Route model binding: parameter {penduduk} di-route resource.
      */
-    public function show(Penduduk $penduduk) // Pastikan route model binding-nya benar
+    public function show(Penduduk $penduduk)
     {
         return view('admin.warga.show', ['warga' => $penduduk]);
     }
@@ -69,8 +73,8 @@ class WargaController extends Controller
      */
     public function edit($id)
     {
-        // Kadang Route Model Binding bermasalah jika nama param beda, kita cari manual biar aman
         $penduduk = Penduduk::findOrFail($id);
+
         return view('admin.warga.edit', ['warga' => $penduduk]);
     }
 
@@ -82,40 +86,106 @@ class WargaController extends Controller
         $penduduk = Penduduk::findOrFail($id);
 
         $validatedData = $request->validate([
-            'nik' => ['required', 'string', 'digits:16', Rule::unique('biodata')->ignore($penduduk->id)],
-            'nama' => 'required|string|max:255',
-            'tempat_lahir' => 'required|string|max:255',
-            'tanggal_lahir' => 'required|date',
-            'jenis_kelamin' => 'required|in:L,P',
-            'alamat' => 'required|string',
-            'agama' => 'required|string',
+            'nik'               => ['required', 'string', 'digits:16', Rule::unique('biodata')->ignore($penduduk->id)],
+            'nama'              => 'required|string|max:255',
+            'tempat_lahir'      => 'required|string|max:255',
+            'tanggal_lahir'     => 'required|date',
+            'jenis_kelamin'     => 'required|in:L,P',
+            'alamat'            => 'required|string',
+            'agama'             => 'required|string',
             'status_perkawinan' => 'required|string',
-            'pekerjaan' => 'required|string',
-            'status_hidup' => 'required|in:hidup,meninggal',
+            'pekerjaan'         => 'required|string',
+            'status_hidup'      => 'required|in:hidup,meninggal',
         ]);
 
-        $penduduk->update($validatedData);
+        // Simpan data lama untuk perbandingan log (opsional, tapi bagus)
+        // $oldName = $penduduk->nama;
 
-        return redirect()->route('admin.warga.index')->with('success', 'Data warga berhasil diperbarui!');
+        $penduduk->update($validatedData);
+        LogAktivitas::catat("Memperbarui data warga: {$penduduk->nama} (NIK: {$penduduk->nik})");
+
+        return redirect()
+            ->route('admin.warga.index')
+            ->with('success', 'Data warga berhasil diperbarui!');
     }
 
     /**
      * Menghapus data warga dari database.
+     * - HAPUS semua detail surat di tabel-tabel turunan (berdasarkan surat_id).
+     * - HAPUS semua surat milik user (apapun statusnya).
+     * - HAPUS akun user.
+     * - HAPUS data penduduk.
+     * - Kirim pesan warning bahwa semua permohonan surat ikut terhapus.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         // 1. Cari data warga berdasarkan ID
         $penduduk = Penduduk::findOrFail($id);
+        
+        // Simpan info untuk log sebelum dihapus
+        $namaWarga = $penduduk->nama;
+        $nikWarga  = $penduduk->nik;
 
-        // 2. (OPSIONAL) Hapus juga Akun Login (User) milik warga ini jika ada
+        $totalSuratDihapus = 0;
+
+        // 2. Kalau warga punya NIK, cari akun user yang terkait
         if ($penduduk->nik) {
-             \App\Models\User::where('nik', $penduduk->nik)->delete();
+            $user = User::where('nik', $penduduk->nik)->first();
+
+            if ($user) {
+                // 3. Ambil semua ID surat milik user ini
+                $suratIds = Surat::where('user_id', $user->id)->pluck('id');
+
+                if ($suratIds->isNotEmpty()) {
+                    $totalSuratDihapus = $suratIds->count();
+
+                    // 4. HAPUS DULU semua detail di tabel-tabel turunan
+                    //    (berdasarkan kolom surat_id)
+                    DB::table('surat_keterangan_tidak_mampu')
+                        ->whereIn('surat_id', $suratIds)->delete();
+
+                    DB::table('surat_keterangan_usaha')
+                        ->whereIn('surat_id', $suratIds)->delete();
+
+                    DB::table('surat_keterangan_domisilis') // Perhatikan nama tabelnya pakai 's' atau tidak di DB Anda
+                        ->whereIn('surat_id', $suratIds)->delete();
+
+                    DB::table('surat_pengantar_skcks')
+                        ->whereIn('surat_id', $suratIds)->delete();
+
+                    DB::table('surat_keterangan_kelahiran')
+                        ->whereIn('surat_id', $suratIds)->delete();
+
+                    DB::table('surat_keterangan_kematian')
+                        ->whereIn('surat_id', $suratIds)->delete();
+
+                    DB::table('surat_keterangan_pindah')
+                        ->whereIn('surat_id', $suratIds)->delete();
+
+                    DB::table('surat_pengantar_nikah')
+                        ->whereIn('surat_id', $suratIds)->delete();
+
+                    // Perhatikan: dari error MySQL, nama tabelnya `surat_pengajuan_tanah` (tanpa "s")
+                    DB::table('surat_pengajuan_tanah')
+                        ->whereIn('surat_id', $suratIds)->delete();
+
+                    // 5. Setelah SEMUA child terhapus, baru hapus surat parent-nya
+                    Surat::whereIn('id', $suratIds)->delete();
+                }
+
+                // 6. Hapus akun user
+                $user->delete();
+            }
         }
 
-        // 3. Hapus Data Warga
+        // 7. Terakhir, HAPUS data warga (penduduk)
         $penduduk->delete();
+        LogAktivitas::catat("Menghapus data warga: {$namaWarga} (NIK: {$nikWarga}) beserta akun dan riwayat suratnya.");
 
-        // 4. Kembali ke halaman tabel (Index), BUKAN ke Dashboard
-        return redirect()->route('admin.warga.index')->with('success', 'Data warga dan akun terkait berhasil dihapus!');
+        // 8. Redirect dengan pesan sukses + peringatan
+        return redirect()
+            ->route('admin.warga.index')
+            ->with('success', 'Data warga berhasil dihapus.')
+            ->with('warning', 'Akun login dan ' . $totalSuratDihapus . ' data permohonan surat (beserta detailnya) milik warga tersebut juga telah dihapus permanen.');
     }
 }

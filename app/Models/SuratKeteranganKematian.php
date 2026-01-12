@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class SuratKeteranganKematian extends Model
 {
     protected $table = 'surat_keterangan_kematian';
-    protected $guarded = ['id'];
+    
+    // IZINKAN SEMUA KOLOM DIISI
+    protected $guarded = [];
 
     public function surat()
     {

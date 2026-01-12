@@ -9,7 +9,7 @@
     </a>
 
     {{-- 2. CONTAINER MENU UTAMA --}}
-    <div class="container mx-auto flex items-center justify-between px-4 pl-28 md:pl-52 relative">
+    <div class="container mx-auto flex items-center justify-between px-4 pl-28 md:pl-[320px] relative">
         
         <div class="w-1"></div>
 
@@ -49,8 +49,8 @@
                             </a>
 
                             {{-- Link Dashboard (Opsional, biar cepat akses) --}}
-                            <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-yellow-600">
-                                Dashboard
+                            <a href="{{ route('warga.riwayat') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-yellow-600">
+                                Riwayat Surat
                             </a>
 
                             <div class="border-t border-gray-100 my-1"></div>
@@ -89,7 +89,7 @@
                         <a href="{{ route('sejarah') }}" class="block px-4 py-2 hover:bg-yellow-50 hover:text-yellow-500">Sejarah</a>
                         <a href="{{ route('visimisi') }}" class="block px-4 py-2 hover:bg-yellow-50 hover:text-yellow-500">Visi Misi</a>
                         <a href="{{ route('struktur') }}" class="block px-4 py-2 hover:bg-yellow-50 hover:text-yellow-500">Struktur Organisasi</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-yellow-50 hover:text-yellow-500">Peta Desa</a>
+                        <a href="{{ route('peta-desa') }}" class="block px-4 py-2 hover:bg-yellow-50 hover:text-yellow-500">Peta Desa</a>
                     </div>
                 </li>
 
@@ -99,7 +99,7 @@
                     </button>
                     <div x-show="open" class="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 z-50" style="display: none;">
                         <a href="{{ route('infografis.penduduk') }}" class="block px-4 py-2 hover:bg-yellow-50 hover:text-yellow-500">Penduduk</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-yellow-50 hover:text-yellow-500">APBDes</a>
+                        <a href="{{ route('infografis.apbdes') }}" class="block px-4 py-2 hover:bg-yellow-50 hover:text-yellow-500">APBDes</a>
                     </div>
                 </li>
 
@@ -140,7 +140,7 @@
                             <a href="{{ route('sejarah') }}" class="block rounded-lg py-2 pl-3 pr-3 text-sm font-semibold text-gray-600 hover:text-yellow-600">Sejarah</a>
                             <a href="{{ route('visimisi') }}" class="block rounded-lg py-2 pl-3 pr-3 text-sm font-semibold text-gray-600 hover:text-yellow-600">Visi Misi</a>
                             <a href="{{ route('struktur') }}" class="block rounded-lg py-2 pl-3 pr-3 text-sm font-semibold text-gray-600 hover:text-yellow-600">Struktur</a>
-                            <a href="#" class="block rounded-lg py-2 pl-3 pr-3 text-sm font-semibold text-gray-600 hover:text-yellow-600">Peta Desa</a>
+                            <a href="{{ route('peta-desa') }}" class="block rounded-lg py-2 pl-3 pr-3 text-sm font-semibold text-gray-600 hover:text-yellow-600">Peta Desa</a>
                         </div>
                     </div>
 
@@ -150,7 +150,7 @@
                         </button>
                         <div x-show="open" class="mt-2 space-y-1 pl-4 border-l-2 border-gray-100">
                             <a href="{{ route('infografis.penduduk') }}" class="block rounded-lg py-2 pl-3 pr-3 text-sm font-semibold text-gray-600 hover:text-yellow-600">Penduduk</a>
-                            <a href="#" class="block rounded-lg py-2 pl-3 pr-3 text-sm font-semibold text-gray-600 hover:text-yellow-600">APBDes</a>
+                            <a href="{{ route('infografis.apbdes') }}" class="block rounded-lg py-2 pl-3 pr-3 text-sm font-semibold text-gray-600 hover:text-yellow-600">APBDes</a>
                         </div>
                     </div>
 

@@ -1,77 +1,48 @@
-<section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Biodata Kependudukan') }}
-        </h2>
+<div class="bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-100">
+    <h3 class="text-lg font-bold text-gray-800 mb-1">Biodata Warga</h3>
+    <p class="text-sm text-gray-500 mb-6">
+        Data biodata diambil dari sistem kependudukan desa.
+    </p>
 
-        <p class="mt-1 text-sm text-gray-600">
-            {{ __("Informasi detail Anda sesuai dengan data kependudukan yang tercatat.") }}
-        </p>
-    </header>
+    @php
+        $bio = $user->penduduk;  // relasi ke tabel penduduk/biodata
+    @endphp
 
-    @if (Auth::user()->biodata)
-        <div class="mt-6 space-y-4">
-            {{-- Data yang sudah ada sebelumnya --}}
+    @if($bio)
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-                <x-input-label for="nama" :value="__('Nama Lengkap')" />
-                <x-text-input id="nama" type="text" class="mt-1 block w-full bg-gray-100" :value="Auth::user()->biodata->nama" disabled />
+                <p class="text-gray-500">NIK</p>
+                <p class="font-semibold text-gray-800">{{ $bio->nik }}</p>
             </div>
-
             <div>
-                <x-input-label for="nik" :value="__('Nomor Induk Kependudukan (NIK)')" />
-                <x-text-input id="nik" type="text" class="mt-1 block w-full bg-gray-100" :value="Auth::user()->biodata->nik" disabled />
+                <p class="text-gray-500">Nama Lengkap</p>
+                <p class="font-semibold text-gray-800">{{ $bio->nama_lengkap }}</p>
             </div>
-
             <div>
-                <x-input-label for="ttl" :value="__('Tempat, Tanggal Lahir')" />
-                <x-text-input id="ttl" type="text" class="mt-1 block w-full bg-gray-100" 
-                    :value="Auth::user()->biodata->tempat_lahir . ', ' . \Carbon\Carbon::parse(Auth::user()->biodata->tanggal_lahir)->format('d F Y')" disabled />
+                <p class="text-gray-500">Tempat, Tanggal Lahir</p>
+                <p class="font-semibold text-gray-800">
+                    {{ $bio->tempat_lahir }}, {{ \Carbon\Carbon::parse($bio->tanggal_lahir)->format('d M Y') }}
+                </p>
             </div>
-
-            {{-- ======================================================= --}}
-            {{-- DATA TAMBAHAN SESUAI PERMINTAAN ANDA --}}
-            {{-- ======================================================= --}}
-
             <div>
-                <x-input-label for="jenis_kelamin" :value="__('Jenis Kelamin')" />
-                <x-text-input id="jenis_kelamin" type="text" class="mt-1 block w-full bg-gray-100" 
-                    :value="Auth::user()->biodata->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan'" disabled />
+                <p class="text-gray-500">Jenis Kelamin</p>
+                <p class="font-semibold text-gray-800">{{ $bio->jenis_kelamin }}</p>
             </div>
-
             <div>
-                <x-input-label for="agama" :value="__('Agama')" />
-                <x-text-input id="agama" type="text" class="mt-1 block w-full bg-gray-100" :value="Auth::user()->biodata->agama" disabled />
+                <p class="text-gray-500">Alamat</p>
+                <p class="font-semibold text-gray-800">
+                    {{ $bio->alamat }}, RT {{ $bio->rt }}/RW {{ $bio->rw }}
+                </p>
             </div>
-            
             <div>
-                <x-input-label for="pendidikan" :value="__('Pendidikan Terakhir')" />
-                <x-text-input id="pendidikan" type="text" class="mt-1 block w-full bg-gray-100" :value="Auth::user()->biodata->pendidikan" disabled />
+                <p class="text-gray-500">Pekerjaan</p>
+                <p class="font-semibold text-gray-800">{{ $bio->pekerjaan }}</p>
             </div>
-
-            <div>
-                <x-input-label for="status_perkawinan" :value="__('Status Perkawinan')" />
-                <x-text-input id="status_perkawinan" type="text" class="mt-1 block w-full bg-gray-100" :value="Auth::user()->biodata->status_perkawinan" disabled />
-            </div>
-            
-            <div>
-                <x-input-label for="pekerjaan" :value="__('Pekerjaan')" />
-                <x-text-input id="pekerjaan" type="text" class="mt-1 block w-full bg-gray-100" :value="Auth::user()->biodata->pekerjaan" disabled />
-            </div>
-
-            <div>
-                <x-input-label for="alamat" :value="__('Alamat')" />
-                <textarea id="alamat" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" disabled>{{ Auth::user()->biodata->alamat }}</textarea>
-            </div>
-
-            <div>
-                <x-input-label for="status_hidup" :value="__('Status Hidup')" />
-                <x-text-input id="status_hidup" type="text" class="mt-1 block w-full bg-gray-100" :value="ucfirst(Auth::user()->biodata->status_hidup)" disabled />
-            </div>
-
+            {{-- tambah field lain sesuai kolom tabelmu --}}
         </div>
     @else
-        <p class="mt-4 text-sm text-red-600">
-            Data biodata tidak ditemukan untuk pengguna ini.
+        <p class="text-sm text-gray-500">
+            Biodata belum tersedia. Silakan hubungi admin desa untuk mengisi data kependudukan Anda.
         </p>
     @endif
-</section>
+</div>
