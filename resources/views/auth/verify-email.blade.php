@@ -1,30 +1,55 @@
 <x-guest-layout>
     <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
+        <h2 class="text-xl font-bold text-gray-800 mb-2">Verifikasi Email</h2>
+        {{ __('Kami telah mengirimkan kode 6 digit ke email: ') }} 
+        <span class="font-bold text-green-700">{{ Auth::user()->email }}</span>.
+        <br>
+        {{ __('Masukkan kode tersebut di bawah ini untuk mengaktifkan akun.') }}
     </div>
 
-    @if (session('status') == 'verification-link-sent')
+    @if (session('status'))
         <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
+            {{ session('status') }}
         </div>
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
-        <form method="POST" action="{{ route('verification.send') }}">
-            @csrf
+    @if ($errors->any())
+        <div class="mb-4 font-medium text-sm text-red-600 bg-red-50 p-3 rounded">
+            {{ $errors->first('otp') }}
+        </div>
+    @endif
 
-            <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
-            </div>
-        </form>
+    <form id="otp-verification-form" method="POST" action="{{ route('otp.check') }}">
+        @csrf
 
+        <div class="mt-4">
+            <x-input-label for="otp" :value="__('Kode OTP (Cek Email Anda)')" />
+            
+            <x-text-input id="otp" class="block mt-1 w-full text-center text-3xl font-mono tracking-[0.5em] py-3" 
+                          type="text" name="otp" required autofocus 
+                          placeholder="------" maxlength="6" />
+        </div>
+    </form>
+
+    <div class="flex items-center justify-between mt-6">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
+            <button type="submit" class="text-sm text-gray-600 hover:text-gray-900 underline">
+                Log Out
+            </button>
+        </form>
 
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
+        <x-primary-button form="otp-verification-form" class="ml-3">
+            {{ __('Verifikasi Akun') }}
+        </x-primary-button>
+    </div>
+    
+    <div class="mt-6 text-center border-t pt-4">
+        <p class="text-sm text-gray-600">Tidak menerima kode?</p>
+        <form method="POST" action="{{ route('otp.resend') }}">
+            @csrf
+            <button type="submit" class="mt-2 text-green-700 font-bold hover:underline text-sm">
+                Kirim Ulang Kode
             </button>
         </form>
     </div>

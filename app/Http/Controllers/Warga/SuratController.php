@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Warga;
 
 use App\Http\Controllers\Controller;
 use App\Models\Surat;
-use App\Models\LogAktivitas; // 🔥 IMPORT MODEL LOG
+use App\Models\LogAktivitas; 
 
 // MODEL DETAIL SURAT
 use App\Models\SuratKeteranganDomisili;
@@ -24,7 +24,37 @@ use Illuminate\Support\Facades\Storage;
 
 class SuratController extends Controller
 {
-    // 1. TAMPILKAN FORM
+    /**
+     * 1. RIWAYAT SURAT & HAPUS NOTIFIKASI
+     */
+    public function index()
+    {
+        $userId = Auth::id();
+
+        // --- LOGIKA BERSIH & AMAN ---
+        // Hanya update surat yang:
+        // 1. Punya user yang login
+        // 2. Statusnya Selesai/Ditolak (Huruf besar/kecil)
+        // 3. Belum dibaca (0 atau NULL)
+        Surat::where('user_id', $userId)
+            ->whereIn('status', ['selesai', 'Selesai', 'SELESAI', 'ditolak', 'Ditolak', 'DITOLAK']) 
+            ->where(function($query) {
+                $query->where('is_read', 0)
+                      ->orWhereNull('is_read');
+            })
+            ->update(['is_read' => 1]); 
+
+        // Ambil data untuk ditampilkan
+        $suratSaya = Surat::where('user_id', $userId)
+                        ->latest()
+                        ->paginate(10);
+
+        return view('warga.riwayat', compact('suratSaya'));
+    }
+
+    /**
+     * 2. TAMPILKAN FORM PENGAJUAN
+     */
     public function create($jenis)
     {
         $jenis_decoded = urldecode($jenis);
@@ -33,7 +63,9 @@ class SuratController extends Controller
         ]);
     }
 
-    // 2. PROSES SIMPAN (STORE)
+    /**
+     * 3. PROSES SIMPAN (STORE)
+     */
     public function store(Request $request)
     {
         // A. VALIDASI
@@ -74,6 +106,7 @@ class SuratController extends Controller
                 'jenis_surat' => $jenisSurat,
                 'status'      => 'menunggu',
                 'keterangan'  => $keperluanUmum,
+                'is_read'     => false, 
             ]);
 
             // C. FUNGSI UPLOAD PINTAR
@@ -226,11 +259,7 @@ class SuratController extends Controller
                     break;
             }
 
-            // ============================================================
-            // 🔥 [LOG ACTIVITY] MENCATAT AKTIVITAS WARGA
-            // ============================================================
             LogAktivitas::catat("Mengajukan permohonan surat baru: $jenisSurat");
-            // ============================================================
 
             DB::commit();
 
@@ -246,7 +275,9 @@ class SuratController extends Controller
         }
     }
 
-    // 3. DETAIL SURAT (View Warga)
+    /**
+     * 4. DETAIL SURAT (View Warga)
+     */
     public function show($id)
     {
         $surat = Surat::with(['user.biodata'])

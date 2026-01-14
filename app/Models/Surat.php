@@ -12,6 +12,10 @@ class Surat extends Model
     protected $table  = 'surat';
     // semua kolom boleh di–mass assign kecuali id
     protected $guarded = ['id'];
+    
+    protected $casts = [
+        'is_read' => 'boolean', // Agar dibaca sebagai true/false, bukan 1/0
+    ];
 
     /*
     |--------------------------------------------------------------------------

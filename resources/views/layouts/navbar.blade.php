@@ -1,3 +1,27 @@
+{{-- 
+    ========================================================
+    LOGIKA MENGHITUNG SURAT "SELESAI" / "DITOLAK" (NOTIFIKASI)
+    ========================================================
+    Kita hitung langsung di sini agar tidak perlu kirim dari controller setiap saat.
+    Logic: Jika ada surat milik user yang statusnya 'selesai' atau 'ditolak',
+    munculkan angka merah.
+--}}
+@php
+    $jmlNotif = 0;
+    if(Auth::check()) {
+        $jmlNotif = \App\Models\Surat::where('user_id', Auth::id())
+                        ->whereIn('status', [
+                            'selesai', 'Selesai', 'SELESAI', 
+                            'ditolak', 'Ditolak', 'DITOLAK'
+                        ])
+                        ->where(function($query) {
+                            $query->where('is_read', 0)
+                                  ->orWhereNull('is_read');
+                        })
+                        ->count();
+    }
+@endphp
+
 <nav x-data="{ mobileMenuOpen: false }" class="bg-white/80 backdrop-blur-sm shadow-md py-3 md:py-4 sticky top-0 z-40 relative"> 
     
     {{-- 1. LOGO (DESKTOP & MOBILE) --}}
@@ -24,12 +48,21 @@
                     </a>
                 @else
                     {{-- 
-                       ▼▼ PERBAIKAN: USER DROPDOWN (LOGOUT ADA DISINI) ▼▼ 
+                        ▼▼ USER DROPDOWN (DESKTOP) ▼▼ 
                     --}}
                     <div x-data="{ open: false }" @click.outside="open = false" class="relative">
                         <button @click="open = !open" class="flex items-center space-x-1 text-gray-600 hover:text-yellow-500 font-medium focus:outline-none">
                             <span>{{ Auth::user()->name }}</span>
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            
+                            {{-- Jika ada notifikasi, beri titik merah kecil di sebelah nama --}}
+                            @if($jmlNotif > 0)
+                                <span class="flex h-2 w-2 relative">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                </span>
+                            @endif
+
+                            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
 
                         {{-- Isi Dropdown User --}}
@@ -40,7 +73,7 @@
                              x-transition:leave="transition ease-in duration-75"
                              x-transition:leave-start="opacity-100 scale-100"
                              x-transition:leave-end="opacity-0 scale-95"
-                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100" 
+                             class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100" 
                              style="display: none;">
                             
                             {{-- Link Profil --}}
@@ -48,9 +81,14 @@
                                 Profil Saya
                             </a>
 
-                            {{-- Link Dashboard (Opsional, biar cepat akses) --}}
-                            <a href="{{ route('warga.riwayat') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-yellow-600">
-                                Riwayat Surat
+                            {{-- Link Riwayat Surat (DENGAN BADGE NOTIFIKASI) --}}
+                            <a href="{{ route('warga.riwayat') }}" class="flex justify-between items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-yellow-600">
+                                <span>Riwayat Surat</span>
+                                @if($jmlNotif > 0)
+                                    <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                        {{ $jmlNotif }}
+                                    </span>
+                                @endif
                             </a>
 
                             <div class="border-t border-gray-100 my-1"></div>
@@ -64,15 +102,19 @@
                             </form>
                         </div>
                     </div>
-                    {{-- ▲▲ AKHIR PERBAIKAN ▲▲ --}}
+                    {{-- ▲▲ AKHIR DROPDOWN DESKTOP ▲▲ --}}
                 @endauth
             </div>
 
             {{-- Hamburger Mobile --}}
-            <button @click="mobileMenuOpen = true" type="button" class="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-md">
+            <button @click="mobileMenuOpen = true" type="button" class="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-md relative">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
+                {{-- Titik merah di menu burger jika ada notifikasi --}}
+                @if(isset($jmlNotif) && $jmlNotif > 0)
+                    <span class="absolute top-2 right-2 h-3 w-3 rounded-full bg-red-500 border-2 border-white"></span>
+                @endif
             </button>
         </div>
 
@@ -81,6 +123,7 @@
             <ul class="flex flex-row space-x-8 font-medium">
                 <li><a href="{{ url('/') }}" class="block py-2 text-lg {{ request()->is('/') ? 'text-yellow-500' : 'text-gray-900 hover:text-yellow-500' }}">Beranda</a></li>
                 
+                {{-- Dropdown Profil Desa --}}
                 <li x-data="{ open: false }" @click.outside="open = false" class="relative">
                     <button @click="open = !open" class="flex items-center py-2 text-lg {{ request()->is('sejarah-desa*', 'visi-misi*', 'struktur-organisasi*') ? 'text-yellow-500' : 'text-gray-900 hover:text-yellow-500' }}">
                         Profil Desa <svg class="w-2.5 h-2.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -93,6 +136,7 @@
                     </div>
                 </li>
 
+                {{-- Dropdown Infografis --}}
                 <li x-data="{ open: false }" @click.outside="open = false" class="relative">
                     <button @click="open = !open" class="flex items-center py-2 text-lg {{ request()->is('infografis*') ? 'text-yellow-500' : 'text-gray-900 hover:text-yellow-500' }}">
                         Infografis <svg class="w-2.5 h-2.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -110,7 +154,7 @@
     </div>
 
 
-    {{-- 5. SIDEBAR MOBILE --}}
+    {{-- 5. SIDEBAR MOBILE (PERBAIKAN DISINI) --}}
     <div x-cloak x-show="mobileMenuOpen" class="relative z-[100] md:hidden" role="dialog" aria-modal="true">
         <div x-show="mobileMenuOpen" class="fixed inset-0 bg-gray-900/80 transition-opacity" @click="mobileMenuOpen = false"></div>
 
@@ -163,7 +207,7 @@
                 </div>
             </div>
 
-            {{-- Footer Mobile --}}
+            {{-- Footer Mobile (Bagian Akun) --}}
             <div class="shrink-0 border-t border-gray-200 bg-gray-50 px-6 py-6">
                 @guest
                     <a href="{{ route('login') }}" class="flex w-full items-center justify-center rounded-md bg-green-700 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-800">
@@ -171,15 +215,30 @@
                     </a>
                 @else
                     <div class="space-y-3">
-                        <div class="px-2 text-sm font-medium text-gray-500">Halo, {{ Auth::user()->name }}</div>
-                        <a href="{{ route('profile.edit') }}" class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-center text-sm font-semibold text-gray-700">Profil Saya</a>
+                        <div class="flex items-center justify-between px-2">
+                            <div class="text-sm font-medium text-gray-500">Halo, {{ Auth::user()->name }}</div>
+                            {{-- Notif Merah di Mobile --}}
+                            @if($jmlNotif > 0)
+                                <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                    {{ $jmlNotif }} Surat Selesai
+                                </span>
+                            @endif
+                        </div>
+
+                        <a href="{{ route('profile.edit') }}" class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                            Profil Saya
+                        </a>
                         
-                        {{-- Tombol Dashboard di Mobile (Opsional) --}}
-                        <a href="{{ route('dashboard') }}" class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-center text-sm font-semibold text-gray-700">Dashboard</a>
+                        {{-- Link Riwayat Surat Mobile --}}
+                        <a href="{{ route('warga.riwayat') }}" class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 {{ $jmlNotif > 0 ? 'border-red-300 text-red-600 bg-red-50' : '' }}">
+                            Riwayat Surat
+                        </a>
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="block w-full rounded-md bg-red-600 px-3 py-2.5 text-center text-sm font-semibold text-white">Log Out</button>
+                            <button type="submit" class="block w-full rounded-md bg-red-600 px-3 py-2.5 text-center text-sm font-semibold text-white hover:bg-red-700">
+                                Log Out
+                            </button>
                         </form>
                     </div>
                 @endauth

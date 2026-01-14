@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Warga;
+namespace App\Http\Controllers\Warga; // Pastikan namespace benar
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileUpdateRequest;
@@ -17,10 +17,20 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        // Ambil user dan load relasi biodata
+        $user = $request->user();
+        
+        // Memastikan relasi biodata dipanggil (lazy loading)
+        // Kita tidak perlu mengirim variabel $biodata terpisah jika di view pakai $user->biodata
+        // Tapi agar rapi, kita biarkan default view returnnya.
+        
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
         ]);
     }
+    
+    // ... method update dan destroy biarkan tetap sama ...
+
 
     /**
      * Memperbarui informasi profil user (Nama & Email).

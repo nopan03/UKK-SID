@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Penduduk; // Pastikan Model ini benar (Penduduk atau Biodata)
+use App\Models\Penduduk; 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Mail; // 🔥 PENTING: Jangan lupa import ini
 
 class RegisteredUserController extends Controller
 {
@@ -42,7 +43,6 @@ class RegisteredUserController extends Controller
         ]);
 
         // 2. CEK APAKAH NIK ADA DI DATA PENDUDUK (DASHBOARD ADMIN)
-        // Logika: Warga tidak bisa daftar jika NIK-nya belum diinput oleh Admin
         $cekPenduduk = Penduduk::where('nik', $request->nik)->first();
 
         if (!$cekPenduduk) {
@@ -50,19 +50,41 @@ class RegisteredUserController extends Controller
             return back()->withErrors(['nik' => 'NIK Anda belum terdaftar di Data Desa. Silakan hubungi Admin Desa.'])->withInput();
         }
 
-        // 3. SIMPAN USER BARU KE DATABASE (INI YANG TADI HILANG)
+        // ============================================================
+        // 🔥 FITUR BARU: GENERATE OTP
+        // ============================================================
+        $otpCode = rand(100000, 999999);
+
+        // 3. SIMPAN USER BARU + KODE OTP
         $user = User::create([
             'name' => $request->name,
             'nik' => $request->nik,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'warga', // Set default role sebagai warga
+            'role' => 'warga', // Default role
+            'otp' => $otpCode, // Simpan kode OTP ke database
         ]);
 
-        // 4. TRIGGER EVENT REGISTERED
+        // 4. KIRIM EMAIL OTP
+        try {
+            $pesan = "Halo $user->name,\n\nTerima kasih telah mendaftar.\nKode verifikasi (OTP) Anda adalah:\n\n$otpCode\n\nMasukkan kode ini di website untuk mengaktifkan akun.";
+            
+            Mail::raw($pesan, function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('Kode Verifikasi OTP - Desa Suruh');
+            });
+        } catch (\Exception $e) {
+            // Opsional: Biarkan kosong atau log error jika email gagal (agar user tetap terbuat)
+        }
+
+        // 5. TRIGGER EVENT (Opsional, bawaan Laravel)
         event(new Registered($user));
 
-        // 5. ARAHKAN KE LOGIN
-       return redirect()->route('login')->with('status', 'Registrasi berhasil! Silakan login dengan Email dan password Anda.');
+        // 6. LOGIN OTOMATIS & LEMPAR KE HALAMAN INPUT OTP
+        // Kita tidak redirect ke Login, tapi langsung Login-kan user
+        // Namun karena belum verified, middleware akan menahan dia di halaman OTP nanti.
+        Auth::login($user);
+
+        return redirect()->route('otp.verify');
     }
 }

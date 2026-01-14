@@ -14,13 +14,16 @@ use App\Http\Controllers\Admin\SuratController as AdminSuratController;
 use App\Http\Controllers\Admin\KeluhanController as AdminKeluhanController;
 use App\Http\Controllers\Admin\LogAktivitasController;
 
-// --- 2. IMPORT CONTROLLER WARGA (YANG BARU DIPINDAH) ---
-// Perhatikan namespace-nya sekarang ada tambahan "\Warga"
+// --- 2. IMPORT CONTROLLER WARGA ---
 use App\Http\Controllers\Warga\PendudukController;
 use App\Http\Controllers\Warga\ApbdesController;
-use App\Http\Controllers\Warga\SuratController;      // ✅ Updated path
-use App\Http\Controllers\Warga\KeluhanController;    // ✅ Updated path
-use App\Http\Controllers\Warga\ProfileController;    // ✅ Updated path
+use App\Http\Controllers\Warga\SuratController;      
+use App\Http\Controllers\Warga\KeluhanController;
+use App\Http\Controllers\Warga\ProfileController;
+
+// --- 3. IMPORT CONTROLLER OTP (🔥 WAJIB DITAMBAHKAN) ---
+use App\Http\Controllers\Auth\OtpController;
+use App\Http\Controllers\Auth\ForgotPasswordOtpController;
 
 
 /* --- 1. ROUTE PUBLIK --- */
@@ -97,23 +100,53 @@ Route::middleware(['auth', 'verified'])
         Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])->name('log.index');
     });
 
-/* --- 4. ROUTE WARGA (BUTUH LOGIN) --- */
+/* --- 4. ROUTE WARGA (BUTUH LOGIN & SUDAH VERIFIKASI) --- */
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    Route::get('/riwayat-surat', function () {
-        $suratSaya = Surat::where('user_id', Auth::id())->latest()->get();
-        return view('warga.riwayat', compact('suratSaya'));
-    })->name('warga.riwayat');
+    //Route Riwayat Surat Warga
+    Route::get('/riwayat-surat', [SuratController::class, 'index'])->name('warga.riwayat');
 
-    // Route Surat Warga (Sekarang menggunakan controller di folder Warga)
+    // Route Surat Warga
     Route::get('/surat/buat/{jenis}', [SuratController::class, 'create'])->name('surat.create');
     Route::post('/surat/simpan', [SuratController::class, 'store'])->name('surat.store');
     Route::get('/surat/detail/{id}', [SuratController::class, 'show'])->name('surat.show');
 
-    // Route Profile (Sekarang menggunakan controller di folder Warga)
+    // Route Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+
+/* --- 5. ROUTE OTP (BUTUH LOGIN, TAPI TIDAK BUTUH VERIFIED) --- */
+Route::middleware('auth')->group(function () {
+    Route::get('/verify-otp', [OtpController::class, 'show'])->name('otp.verify');
+    Route::post('/verify-otp', [OtpController::class, 'verify'])->name('otp.check');
+    Route::post('/resend-otp', [OtpController::class, 'resend'])->name('otp.resend');
+});
+
+// =========================================================================
+// 🔥 PERBAIKAN POSISI: require auth.php DITARUH DISINI (SEBELUM CUSTOM)
+// =========================================================================
+require __DIR__.'/auth.php'; 
+
+
+// === ROUTE KHUSUS LUPA PASSWORD DENGAN OTP (DITARUH PALING BAWAH AGAR MENANG) ===
+Route::middleware('guest')->group(function () {
+    
+    // Halaman Input Email
+    Route::get('forgot-password', [ForgotPasswordOtpController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+
+    // Proses Kirim OTP
+    Route::post('forgot-password', [ForgotPasswordOtpController::class, 'sendOtp'])
+        ->name('password.email'); 
+
+    // Halaman Input OTP + Password Baru
+    Route::get('reset-password-otp', [ForgotPasswordOtpController::class, 'showResetForm'])
+        ->name('password.reset.otp.form');
+
+    // Proses Simpan Password Baru
+    Route::post('reset-password-otp', [ForgotPasswordOtpController::class, 'updatePassword'])
+        ->name('password.update.otp');
+});
