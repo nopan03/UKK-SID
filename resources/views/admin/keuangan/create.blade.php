@@ -22,11 +22,17 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     {{-- Tanggal --}}
-                    <div>
-                        <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Transaksi</label>
-                        <input type="date" id="tanggal" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" required
-                            class="w-full rounded-lg border-gray-300 focus:border-green-500 focus:ring focus:ring-green-200 transition duration-200">
-                        @error('tanggal') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Transaksi</label>
+                        
+                        <input 
+                            type="date" 
+                            name="tanggal_transaksi" 
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight bg-gray-200 cursor-not-allowed"
+                            value="{{ date('Y-m-d') }}" 
+                            readonly
+                        >                   
+                        <p class="text-xs text-red-500 mt-1">*Tanggal otomatis terisi hari ini dan tidak dapat diubah.</p>
                     </div>
 
                     {{-- Kategori (Input Text Sederhana) --}}

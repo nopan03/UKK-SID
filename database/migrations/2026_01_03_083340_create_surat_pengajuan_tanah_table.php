@@ -6,15 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('surat_pengajuan_tanah', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->integer('surat_id')->nullable()->index('surat_id');
-            $table->integer('biodata_id')->nullable()->index('biodata_id');
+            $table->id(); // Pengganti integer('id', true)
+
+            // 🔥 PERBAIKAN: Ganti integer jadi unsignedBigInteger
+            $table->unsignedBigInteger('surat_id')->nullable()->index('surat_id');
+            $table->unsignedBigInteger('biodata_id')->nullable()->index('biodata_id');
+            
             $table->text('lokasi_tanah')->nullable();
             $table->decimal('luas_tanah', 10)->nullable();
             $table->text('keperluan_tanah')->nullable();
@@ -26,9 +26,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('surat_pengajuan_tanah');

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use Illuminate\Support\Facades\Mail; // 🔥 PENTING: Jangan lupa import ini
+use Illuminate\Support\Facades\Mail;
 
 class RegisteredUserController extends Controller
 {
@@ -30,16 +30,32 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // 1. VALIDASI INPUT
+        // 1. VALIDASI INPUT (DIPERBAIKI)
         $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:users,name'], 
-            'nik' => ['required', 'string', 'max:16', 'unique:users,nik'], 
+            'name' => ['required', 'string', 'max:255', 'unique:users,name'],
+            
+            // 🔥 UBAH INI: Pakai 'digits:16' dan 'numeric'
+            'nik' => ['required', 'numeric', 'digits:16', 'unique:users,nik'], 
+            
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
+            // --- TAMBAHAN BAHASA INDONESIA LENGKAP ---
+            'name.required' => 'Nama wajib diisi.',
             'name.unique' => 'Nama lengkap ini sudah memiliki akun.',
-            'nik.unique' => 'NIK ini sudah terdaftar sebagai akun pengguna. Silakan login saja.',
+            
+            'nik.required' => 'NIK wajib diisi.',
+            'nik.numeric' => 'NIK harus berupa angka.',
+            'nik.digits' => 'NIK harus berjumlah pas 16 digit.',
+            'nik.unique' => 'NIK ini sudah terdaftar. Silakan login saja.',
+            
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email ini sudah digunakan.',
+            
+            'password.required' => 'Password wajib diisi.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'password.min' => 'Password minimal harus 8 karakter.',
         ]);
 
         // 2. CEK APAKAH NIK ADA DI DATA PENDUDUK (DASHBOARD ADMIN)

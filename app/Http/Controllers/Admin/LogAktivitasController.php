@@ -1,19 +1,36 @@
 <?php
 
-namespace App\Http\Controllers\Admin; // Namespace harus benar (Admin)
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\LogAktivitas; // Import Model LogAktivitas
+use Kreait\Firebase\Factory;
 use Illuminate\Http\Request;
 
-class LogAktivitasController extends Controller // Turunan dari Controller, bukan Model
+class LogAktivitasController extends Controller
 {
     public function index()
     {
-        // Ambil data log terbaru
-        // Pastikan model LogAktivitas sudah ada dan benar
-        $logs = LogAktivitas::with('user')->orderBy('waktu', 'desc')->paginate(20);
-        
+        try {
+            // 1. Koneksi Firebase
+            $factory = (new \Kreait\Firebase\Factory)
+                ->withServiceAccount(base_path(env('FIREBASE_CREDENTIALS')))
+                ->withDatabaseUri(env('FIREBASE_DATABASE_URL'));
+            
+            $database = $factory->createDatabase();
+
+            // 2. Ambil Semua Data (Tanpa Filter Aneh-aneh)
+            $logsRaw = $database->getReference('logs')->getValue();
+
+            // 3. Ubah ke Collection Laravel & Urutkan di Sini
+            // sortByDesc('waktu') artinya: Yang waktunya paling baru, taruh di atas.
+            $logs = collect($logsRaw ?? [])->sortByDesc('waktu');
+
+        } catch (\Exception $e) {
+            // Jika error, biarkan kosong (jangan mati aplikasinya)
+            $logs = collect([]);
+        }
+
+        // 4. Kirim ke View
         return view('admin.log.index', compact('logs'));
     }
 }

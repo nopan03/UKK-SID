@@ -33,27 +33,27 @@ class KeuanganController extends Controller
     /**
      * Menyimpan transaksi baru ke database.
      */
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'tanggal'    => 'required|date',
-            'kategori'   => 'required|string|max:255',
-            'keterangan' => 'required|string',
-            'jenis'      => 'required|in:pemasukan,pengeluaran',
-            'jumlah'     => 'required|numeric|min:0',
-        ]);
+   public function store(Request $request)
+{
+    // 1. Validasi Input Lainnya (Tanggal tidak perlu divalidasi karena kita set manual)
+    $request->validate([
+        'jenis_transaksi' => 'required',
+        'nominal' => 'required|numeric',
+        'keterangan' => 'required',
+    ]);
 
-        $validatedData['user_id'] = auth()->id();
-
-        KeuanganDesa::create($validatedData);
-
-        $rupiah = number_format($request->jumlah, 0, ',', '.');
-        $jenis  = ucfirst($request->jenis); // Jadi "Pemasukan" atau "Pengeluaran"
+    // 2. Simpan Data
+    Keuangan::create([
+        'jenis_transaksi' => $request->jenis_transaksi,
+        'nominal'         => $request->nominal,
+        'keterangan'      => $request->keterangan,
+        'tanggal_transaksi' => now(), 
         
-        LogAktivitas::catat("Input Keuangan ($jenis): Rp $rupiah - $request->keterangan");
+    ]);
+    
 
-        return redirect()->route('admin.keuangan.index')->with('success', 'Transaksi berhasil ditambahkan.');
-    }
+    return redirect()->back()->with('success', 'Data keuangan berhasil disimpan!');
+}
 
     /**
      * Menampilkan form untuk mengedit transaksi.

@@ -31,11 +31,7 @@ class SuratController extends Controller
     {
         $userId = Auth::id();
 
-        // --- LOGIKA BERSIH & AMAN ---
-        // Hanya update surat yang:
-        // 1. Punya user yang login
-        // 2. Statusnya Selesai/Ditolak (Huruf besar/kecil)
-        // 3. Belum dibaca (0 atau NULL)
+        // Update status 'read' hanya untuk surat yang sudah selesai/ditolak
         Surat::where('user_id', $userId)
             ->whereIn('status', ['selesai', 'Selesai', 'SELESAI', 'ditolak', 'Ditolak', 'DITOLAK']) 
             ->where(function($query) {
@@ -44,7 +40,7 @@ class SuratController extends Controller
             })
             ->update(['is_read' => 1]); 
 
-        // Ambil data untuk ditampilkan
+        // Ambil data riwayat surat
         $suratSaya = Surat::where('user_id', $userId)
                         ->latest()
                         ->paginate(10);
@@ -68,7 +64,7 @@ class SuratController extends Controller
      */
     public function store(Request $request)
     {
-        // A. VALIDASI
+        // A. VALIDASI INPUT
         $request->validate([
             'jenis_surat' => 'required',
             'keperluan'   => 'required|string',
@@ -76,6 +72,18 @@ class SuratController extends Controller
             // Validasi Khusus SKTM
             'penghasilan' => 'nullable|numeric',
             'tanggungan'  => 'nullable|numeric',
+
+            // --- VALIDASI SURAT NIKAH (LENGKAP) ---
+            'nama_pasangan'              => 'nullable|string',
+            'nik_pasangan'               => 'nullable|numeric|digits:16',
+            'tempat_lahir_pasangan'      => 'nullable|string',
+            'tanggal_lahir_pasangan' => 'nullable|date|after:1900-01-01|before:tomorrow',
+            'agama_pasangan'             => 'nullable|string',
+            'pekerjaan_pasangan'         => 'nullable|string',
+            'alamat_pasangan'            => 'nullable|string',
+            'status_perkawinan_pasangan' => 'nullable|string',
+            'tanggal_nikah' => 'nullable|date|after:1900-01-01|before:9999-12-31',
+            'lokasi_nikah'               => 'nullable|string',
 
             // Validasi File (Limit 2MB)
             'file_ktp'          => 'nullable|mimes:jpg,jpeg,png,pdf|max:2048',
@@ -96,11 +104,11 @@ class SuratController extends Controller
         DB::beginTransaction();
 
         try {
-            $biodataId      = optional(Auth::user()->biodata)->id;
-            $jenisSurat     = $request->jenis_surat;
-            $keperluanUmum  = $request->keperluan; 
+            $biodataId     = optional(Auth::user()->biodata)->id;
+            $jenisSurat    = $request->jenis_surat;
+            $keperluanUmum = $request->keperluan; 
 
-            // B. SIMPAN SURAT UTAMA
+            // B. SIMPAN SURAT UTAMA (Header)
             $surat = Surat::create([
                 'user_id'     => Auth::id(),
                 'jenis_surat' => $jenisSurat,
@@ -109,7 +117,7 @@ class SuratController extends Controller
                 'is_read'     => false, 
             ]);
 
-            // C. FUNGSI UPLOAD PINTAR
+            // C. FUNGSI UPLOAD FILE
             $uploadFile = function ($inputName, $folderName) use ($request) {
                 if ($request->hasFile($inputName)) {
                     if (!Storage::disk('public')->exists($folderName)) {
@@ -122,7 +130,7 @@ class SuratController extends Controller
                 return null;
             };
 
-            // D. SIMPAN DETAIL SESUAI JENIS
+            // D. SIMPAN DETAIL SESUAI JENIS SURAT
             switch ($jenisSurat) {
 
                 // 1. SKTM
@@ -147,14 +155,14 @@ class SuratController extends Controller
                 // 2. SK USAHA
                 case 'Surat Keterangan Usaha':
                     SuratKeteranganUsaha::create([
-                        'surat_id'        => $surat->id,
-                        'biodata_id'      => $biodataId,
-                        'nama_usaha'      => $request->nama_usaha,
-                        'jenis_usaha'     => $request->jenis_usaha,
-                        'alamat_usaha'    => $request->alamat_usaha,
-                        'lama_usaha'      => $request->lama_usaha,
-                        'file_ktp'        => $uploadFile('file_ktp', 'ktp'),
-                        'file_bukti_usaha'=> $uploadFile('file_bukti_usaha', 'bukti_usaha'),
+                        'surat_id'         => $surat->id,
+                        'biodata_id'       => $biodataId,
+                        'nama_usaha'       => $request->nama_usaha,
+                        'jenis_usaha'      => $request->jenis_usaha,
+                        'alamat_usaha'     => $request->alamat_usaha,
+                        'lama_usaha'       => $request->lama_usaha,
+                        'file_ktp'         => $uploadFile('file_ktp', 'ktp'),
+                        'file_bukti_usaha' => $uploadFile('file_bukti_usaha', 'bukti_usaha'),
                     ]);
                     break;
 
@@ -226,35 +234,65 @@ class SuratController extends Controller
                     ]);
                     break;
 
-                // 8. NIKAH
+               // 8. SURAT PENGANTAR NIKAH (YANG SUDAH DIPERBAIKI LENGKAP)
                 case 'Surat Pengantar Nikah':
-                    SuratPengantarNikah::create([
-                        'surat_id'          => $surat->id,
-                        'pria_id'           => $request->pria_id,
-                        'nik_pria'          => $request->nik_pria,
-                        'wanita_id'         => $request->wanita_id,
-                        'nik_wanita'        => $request->nik_wanita,
-                        'tanggal_nikah'     => $request->tanggal_nikah,
-                        'lokasi_nikah'      => $request->lokasi_nikah,
+                    
+                    // Cek Gender User yang login
+                    $genderUser = optional(Auth::user()->biodata)->jenis_kelamin;
+                    $nikUser    = optional(Auth::user()->biodata)->nik;
+
+                    // Siapkan Data untuk Disimpan
+                    $dataNikah = [
+                        'surat_id' => $surat->id,
+                        
+                        // 🔥 DATA RENCANA PERNIKAHAN 🔥
+                        'tanggal_nikah' => $request->tanggal_nikah, 
+                        'lokasi_nikah'  => $request->lokasi_nikah,
+
+                        // 🔥 DATA PASANGAN (LENGKAP) 🔥
+                        'nama_pasangan'              => $request->nama_pasangan,
+                        'tempat_lahir_pasangan'      => $request->tempat_lahir_pasangan,
+                        'tanggal_lahir_pasangan'     => $request->tanggal_lahir_pasangan,
+                        'agama_pasangan'             => $request->agama_pasangan,
+                        'alamat_pasangan'            => $request->alamat_pasangan,
+                        'status_perkawinan_pasangan' => $request->status_perkawinan_pasangan,
+                        'pekerjaan_pasangan'         => $request->pekerjaan_pasangan,
+
+                        // File Upload
                         'file_ktp'          => $uploadFile('file_ktp', 'ktp'),
                         'file_kk'           => $uploadFile('file_kk', 'kk'),
                         'file_akta'         => $uploadFile('file_akta', 'akta_kelahiran'),
                         'file_ktp_pasangan' => $uploadFile('file_ktp_pasangan', 'ktp'),
-                    ]);
+                    ];
+
+                    // LOGIKA: Tentukan Kolom NIK (Siapa Suami, Siapa Istri)
+                    // Jika user Laki-laki atau 'L', maka user adalah Calon Suami
+                    if ($genderUser == 'Laki-laki' || $genderUser == 'L') {
+                        $dataNikah['pria_id']  = $biodataId;
+                        $dataNikah['nik_pria'] = $nikUser;
+                        $dataNikah['nik_wanita'] = $request->nik_pasangan; // Pasangan = Istri
+                    } else {
+                        // Jika user Perempuan, maka user adalah Calon Istri
+                        $dataNikah['wanita_id']  = $biodataId;
+                        $dataNikah['nik_wanita'] = $nikUser;
+                        $dataNikah['nik_pria']   = $request->nik_pasangan; // Pasangan = Suami
+                    }
+
+                    SuratPengantarNikah::create($dataNikah);
                     break;
 
                 // 9. TANAH
                 case 'Surat Pengajuan Tanah':
                     SuratPengajuanTanah::create([
-                        'surat_id'        => $surat->id,
-                        'biodata_id'      => $biodataId,
-                        'lokasi_tanah'    => $request->lokasi_tanah,
-                        'luas_tanah'      => $request->luas_tanah,
-                        'keperluan_tanah' => $request->keperluan_tanah,
-                        'file_ktp'        => $uploadFile('file_ktp', 'ktp'),
-                        'file_kk'         => $uploadFile('file_kk', 'kk'),
-                        'file_bukti_tanah'=> $uploadFile('file_bukti_tanah', 'bukti_tanah'),
-                        'file_pbb'        => $uploadFile('file_pbb', 'bukti_pbb'),
+                        'surat_id'         => $surat->id,
+                        'biodata_id'       => $biodataId,
+                        'lokasi_tanah'     => $request->lokasi_tanah,
+                        'luas_tanah'       => $request->luas_tanah,
+                        'keperluan_tanah'  => $request->keperluan_tanah,
+                        'file_ktp'         => $uploadFile('file_ktp', 'ktp'),
+                        'file_kk'          => $uploadFile('file_kk', 'kk'),
+                        'file_bukti_tanah' => $uploadFile('file_bukti_tanah', 'bukti_tanah'),
+                        'file_pbb'         => $uploadFile('file_pbb', 'bukti_pbb'),
                     ]);
                     break;
             }
@@ -300,5 +338,17 @@ class SuratController extends Controller
         }
 
         return view('warga.surat.show', compact('surat', 'detail'));
+    }
+
+    /**
+     * Menampilkan Halaman Validasi (Publik)
+     */
+    public function validasi($id)
+    {
+        // Cari surat berdasarkan ID, sertakan data user dan biodata
+        $surat = \App\Models\Surat::with(['user.biodata'])->findOrFail($id);
+
+        // Tampilkan view validasi
+        return view('warga.surat.validasi', compact('surat'));
     }
 }

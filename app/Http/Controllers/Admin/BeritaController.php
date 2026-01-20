@@ -27,10 +27,11 @@ class BeritaController extends Controller
     public function store(Request $request)
     {
         // 1. Validasi
+        // 🔥 Perubahan: 'tanggal' dihapus dari validasi karena kita akan isi otomatis
         $validatedData = $request->validate([
             'judul'    => 'required|string|max:255|unique:berita,judul',
             'kategori' => 'required|string|max:100',
-            'tanggal'  => 'required|date',
+            // 'tanggal' => 'required|date', <--- INI DIHAPUS
             'isi'      => 'required|string',
             'gambar'   => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -41,8 +42,12 @@ class BeritaController extends Controller
             $validatedData['gambar'] = $path;
         }
 
+        // 3. Set Data Otomatis
         $validatedData['slug']    = Str::slug($request->judul, '-');
         $validatedData['user_id'] = auth()->id();
+        
+        // 🔥 Perubahan: Paksa tanggal menjadi HARI INI
+        $validatedData['tanggal'] = date('Y-m-d'); 
         
         Berita::create($validatedData);
         LogAktivitas::catat("Memublikasikan berita desa baru: {$request->judul}");
@@ -65,10 +70,12 @@ class BeritaController extends Controller
     // Update Berita
     public function update(Request $request, Berita $berita)
     {
+        // 🔥 Perubahan: 'tanggal' dihapus dari validasi update juga
+        // Agar tanggal asli tidak berubah meskipun diedit
         $validatedData = $request->validate([
             'judul'    => ['required', 'string', 'max:255', Rule::unique('berita')->ignore($berita->id)],
             'kategori' => 'required|string|max:100',
-            'tanggal'  => 'required|date',
+            // 'tanggal' => 'required|date', <--- INI DIHAPUS
             'isi'      => 'required|string',
             'gambar'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -84,7 +91,9 @@ class BeritaController extends Controller
 
         $validatedData['slug'] = Str::slug($request->judul, '-');
         
+        // Update data (Kolom 'tanggal' di database tidak akan disentuh, jadi tetap aman)
         $berita->update($validatedData);
+        
         LogAktivitas::catat("Menyunting/Edit berita desa: {$berita->judul}");
 
         return redirect()->route('admin.berita.index')->with('success', 'Berita berhasil diperbarui!');
@@ -102,7 +111,6 @@ class BeritaController extends Controller
         $berita->delete();
         LogAktivitas::catat("Menghapus berita desa: {$judulLama}");
         
-
         return redirect()->route('admin.berita.index')->with('success', 'Berita berhasil dihapus!');
     }
 }

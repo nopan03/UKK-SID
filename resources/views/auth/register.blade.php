@@ -11,10 +11,22 @@
         </div>
 
         <!-- NIK -->
-        <div class="mt-4">
-            <x-input-label for="nik" :value="__('NIK')" />
-            <x-text-input id="nik" class="block mt-1 w-full" type="text" name="nik" :value="old('nik')"
-                required autocomplete="nik" />
+        <div class="mt-4"> {{-- Tambah class mt-4 biar ada jarak --}}
+            <x-input-label for="nik" value="{{ __('NIK') }}" />
+            
+            {{-- 🔥 PERBAIKAN: Gunakan x-text-input --}}
+            <x-text-input id="nik" class="block mt-1 w-full" 
+                    type="text" 
+                    name="nik" 
+                    :value="old('nik')" 
+                    required 
+                    autofocus 
+                    autocomplete="username"
+                    maxlength="16"
+                    inputmode="numeric"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                    placeholder="Masukkan 16 Digit NIK" />
+                    
             <x-input-error :messages="$errors->get('nik')" class="mt-2" />
         </div>
 

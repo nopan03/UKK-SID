@@ -79,7 +79,19 @@
         </div>
     @endif
 
-    {{-- TABEL DATA (Sama seperti sebelumnya) --}}
+    {{-- MESSAGE ALERT --}}
+    @if(session('success'))
+        <div class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded shadow-sm">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded shadow-sm">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    {{-- TABEL DATA --}}
     <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500">
@@ -112,11 +124,11 @@
                         </td>
                         
                         <td class="px-6 py-4">
-                            @if($surat->status == 'menunggu')
+                            @if(strtolower($surat->status) == 'menunggu')
                                 <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2.5 py-0.5 rounded border border-yellow-200">Menunggu</span>
-                            @elseif($surat->status == 'proses')
+                            @elseif(strtolower($surat->status) == 'proses' || strtolower($surat->status) == 'diproses')
                                 <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded border border-blue-200">Diproses</span>
-                            @elseif($surat->status == 'selesai')
+                            @elseif(strtolower($surat->status) == 'selesai')
                                 <span class="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-0.5 rounded border border-green-200">Selesai</span>
                             @else
                                 <span class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-0.5 rounded border border-red-200">Ditolak</span>
@@ -124,10 +136,26 @@
                         </td>
                         
                         <td class="px-6 py-4 text-center">
-                            <a href="{{ route('admin.surat.show', $surat->id) }}" class="inline-flex items-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition shadow-md transform hover:-translate-y-0.5">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                Verifikasi
-                            </a>
+                            {{-- 🔥 UPDATE DISINI: Menggunakan Flex agar tombol sejajar 🔥 --}}
+                            <div class="flex justify-center items-center gap-2">
+                                
+                                {{-- Tombol Verifikasi/Detail --}}
+                                <a href="{{ route('admin.surat.show', $surat->id) }}" class="inline-flex items-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition shadow-md transform hover:-translate-y-0.5">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    Verifikasi
+                                </a>
+
+                                {{-- 🔥 TOMBOL KIRIM EMAIL MANUAL (Hanya jika Selesai) 🔥 --}}
+                                @if(strtolower($surat->status) == 'selesai')
+                                    <form action="{{ route('admin.surat.kirim-email', $surat->id) }}" method="POST" onsubmit="return confirm('Kirim email surat jadi ke warga?');">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium rounded-lg transition shadow-md transform hover:-translate-y-0.5" title="Kirim Ulang Email">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                        </button>
+                                    </form>
+                                @endif
+
+                            </div>
                         </td>
                     </tr>
                     @empty

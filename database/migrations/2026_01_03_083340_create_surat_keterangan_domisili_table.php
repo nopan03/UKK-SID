@@ -12,9 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('surat_keterangan_domisili', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->integer('surat_id')->nullable()->index('surat_id');
-            $table->integer('biodata_id')->nullable()->index('biodata_id');
+            $table->id(); // Ganti integer('id', true) jadi ini biar standar
+            
+            // 🔥 PERBAIKAN: Ganti integer jadi unsignedBigInteger
+            $table->unsignedBigInteger('surat_id')->nullable()->index('surat_id');
+            $table->unsignedBigInteger('biodata_id')->nullable()->index('biodata_id'); 
+            
             $table->text('keperluan')->nullable();
             $table->string('nomor_surat')->nullable();
             $table->timestamps();
@@ -22,7 +25,6 @@ return new class extends Migration
             $table->string('file_kk')->nullable();
         });
     }
-
     /**
      * Reverse the migrations.
      */

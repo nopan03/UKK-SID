@@ -21,7 +21,7 @@ use App\Http\Controllers\Warga\SuratController;
 use App\Http\Controllers\Warga\KeluhanController;
 use App\Http\Controllers\Warga\ProfileController;
 
-// --- 3. IMPORT CONTROLLER OTP (🔥 WAJIB DITAMBAHKAN) ---
+// --- 3. IMPORT CONTROLLER OTP ---
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Auth\ForgotPasswordOtpController;
 
@@ -93,6 +93,10 @@ Route::middleware(['auth', 'verified'])
         Route::get('/surat/{surat}/pdf', [AdminSuratController::class, 'cetakPdf'])
             ->name('surat.pdf');
 
+        // 🔥 PERBAIKAN DISINI (Hapus /admin di depan) 🔥
+        Route::post('/surat/{id}/kirim-email', [AdminSuratController::class, 'kirimEmail'])
+            ->name('surat.kirim-email');
+
         // Route Keluhan Admin
         Route::resource('keluhan', AdminKeluhanController::class);
 
@@ -115,6 +119,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Route Validasi QR Code (PUBLIK)
+    // Gunakan controller Warga atau buat method baru, pastikan class sudah di-import di atas
+    Route::get('/validasi-surat/{id}', [App\Http\Controllers\Warga\SuratController::class, 'validasi'])
+        ->name('surat.validasi');
 });
 
 
@@ -126,12 +135,12 @@ Route::middleware('auth')->group(function () {
 });
 
 // =========================================================================
-// 🔥 PERBAIKAN POSISI: require auth.php DITARUH DISINI (SEBELUM CUSTOM)
+// REQUIRE AUTH
 // =========================================================================
 require __DIR__.'/auth.php'; 
 
 
-// === ROUTE KHUSUS LUPA PASSWORD DENGAN OTP (DITARUH PALING BAWAH AGAR MENANG) ===
+// === ROUTE KHUSUS LUPA PASSWORD DENGAN OTP ===
 Route::middleware('guest')->group(function () {
     
     // Halaman Input Email

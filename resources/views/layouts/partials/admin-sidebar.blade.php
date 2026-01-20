@@ -49,22 +49,38 @@
 
         {{-- DROPDOWN PERMOHONAN SURAT --}}
         <div x-data="{ open: {{ request()->routeIs('admin.surat.*') ? 'true' : 'false' }} }">
+            
+            {{-- 1. TOMBOL INDUK --}}
             <button @click="open = !open" type="button" 
                 class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.surat.*') ? 'bg-green-800 text-white' : 'text-green-100 hover:bg-green-800 hover:text-white' }}">
-                <div class="flex items-center">
+                
+                <div class="flex items-center w-full">
                     <i class="ti ti-mail-opened text-xl mr-3"></i>
                     <span>Permohonan Surat</span>
+                    
+                    {{-- 🔥 LOGIKA BARU DISINI 🔥 --}}
+                    {{-- Tampilkan Total HANYA JIKA dropdown tertutup (!open) --}}
+                    @if(isset($totalSurat) && $totalSurat > 0)
+                        <span x-show="!open" 
+                              class="ml-auto bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                            {{ $totalSurat }}
+                        </span>
+                    @endif
+                    {{-- 🔥 AKHIR LOGIKA 🔥 --}}
+
                 </div>
-                <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                
+                {{-- Ikon Panah (Ikut menghilang/bergeser rapi) --}}
+                <svg x-show="open || {{ $totalSurat ?? 0 }} == 0" class="w-4 h-4 transition-transform duration-200 ml-auto" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
 
-            {{-- Sub-menu --}}
+            {{-- 2. SUB-MENU (Anak Surat) --}}
             <div x-show="open" x-collapse class="space-y-1 mt-1 pl-11 pr-2">
                 <a href="{{ route('admin.surat.index') }}" 
                    class="block px-3 py-2 rounded-md text-sm transition-colors duration-200 {{ !request()->has('jenis') && request()->routeIs('admin.surat.index') ? 'text-white bg-green-700 font-semibold' : 'text-green-200 hover:text-white hover:bg-green-800' }}">
                    Semua Surat
                 </a>
-                {{-- Item Dropdown --}}
+                
                 @php
                     $jenisSurat = [
                         'Surat Keterangan Tidak Mampu' => 'SKTM',
@@ -81,18 +97,36 @@
 
                 @foreach($jenisSurat as $key => $label)
                     <a href="{{ route('admin.surat.index', ['jenis' => $key]) }}" 
-                       class="block px-3 py-2 rounded-md text-sm transition-colors duration-200 {{ request()->input('jenis') == $key ? 'text-white bg-green-700 font-semibold' : 'text-green-200 hover:text-white hover:bg-green-800' }}">
-                       {{ $label }}
+                       class="flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors duration-200 {{ request()->input('jenis') == $key ? 'text-white bg-green-700 font-semibold' : 'text-green-200 hover:text-white hover:bg-green-800' }}">
+                       
+                       <span>{{ $label }}</span>
+
+                       {{-- Badge Per Jenis (Hanya muncul saat dropdown terbuka) --}}
+                       @if(isset($notifPerJenis[$key]) && $notifPerJenis[$key] > 0)
+                           <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                               {{ $notifPerJenis[$key] }}
+                           </span>
+                       @endif
+
                     </a>
                 @endforeach
             </div>
         </div>
 
-        {{-- Keluhan Warga --}}
+        {{-- Keluhan Warga (Tetap Pakai Badge Total) --}}
         <a href="{{ route('admin.keluhan.index') ?? '#' }}" 
-           class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 text-green-100 hover:bg-green-800 hover:text-white">
-            <i class="ti ti-message-exclamation text-xl mr-3"></i>
-            <span>Keluhan Warga</span>
+           class="flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 text-green-100 hover:bg-green-800 hover:text-white">
+            <div class="flex items-center">
+                <i class="ti ti-message-exclamation text-xl mr-3"></i>
+                <span>Keluhan Warga</span>
+            </div>
+            
+            {{-- Badge Keluhan (Tanpa Animasi) --}}
+            @if(isset($notifKeluhan) && $notifKeluhan > 0)
+                <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    {{ $notifKeluhan }}
+                </span>
+            @endif
         </a>
 
         <div class="my-4 border-t border-green-800/50"></div>
@@ -107,7 +141,7 @@
 
     </div>
 
-    {{-- 3. FOOTER LOGOUT (Fixed Bottom) --}}
+    {{-- 3. FOOTER LOGOUT --}}
     <div class="p-4 border-t border-green-800 bg-green-900">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
@@ -120,7 +154,6 @@
 
 </aside>
 
-{{-- SCRIPT AGAR DROPDOWN LEBIH SMOOTH (X-COLLAPSE) --}}
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.plugin(collapse)

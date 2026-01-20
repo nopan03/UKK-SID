@@ -12,9 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('surat_keterangan_pindah', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->integer('surat_id')->nullable()->index('surat_id');
-            $table->integer('biodata_id')->nullable()->index('biodata_id');
+            $table->id();
+
+            // 🔥 PERBAIKAN: Ganti integer jadi unsignedBigInteger
+            $table->unsignedBigInteger('surat_id')->nullable()->index('surat_id');
+            $table->unsignedBigInteger('biodata_id')->nullable()->index('biodata_id');
+            
             $table->text('alamat_asal')->nullable();
             $table->text('alamat_tujuan')->nullable();
             $table->text('alasan_pindah')->nullable();

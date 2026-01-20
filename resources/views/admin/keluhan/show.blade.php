@@ -142,7 +142,8 @@
                             </select>
                         </div>
 
-                        <button type="submit" onclick="return confirm('Apakah Anda yakin? Jika status SELESAI, data akan dikunci.')" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md flex justify-center items-center">
+                        {{-- MODIFIKASI 1: ONCLICK DIHAPUS --}}
+                        <button type="submit" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md flex justify-center items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             Simpan Perubahan
                         </button>
@@ -151,7 +152,9 @@
 
                 <div class="mt-8 pt-6 border-t border-gray-100 text-center">
                     <p class="text-xs text-gray-400 mb-3">Hapus jika laporan ini spam atau tidak valid.</p>
-                    <form action="{{ route('admin.keluhan.destroy', $keluhan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus laporan ini secara permanen?');">
+                    
+                    {{-- MODIFIKASI 2: ONSUBMIT DIHAPUS --}}
+                    <form action="{{ route('admin.keluhan.destroy', $keluhan->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
                         <button class="text-red-600 text-sm font-medium hover:text-red-800 hover:bg-red-50 py-2 px-4 rounded transition border border-transparent hover:border-red-100 w-full">
