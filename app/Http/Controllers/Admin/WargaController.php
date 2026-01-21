@@ -147,10 +147,10 @@ class WargaController extends Controller
                     DB::table('surat_keterangan_usaha')
                         ->whereIn('surat_id', $suratIds)->delete();
 
-                    DB::table('surat_keterangan_domisilis') // Perhatikan nama tabelnya pakai 's' atau tidak di DB Anda
+                    DB::table('surat_keterangan_domisili') // Perhatikan nama tabelnya pakai 's' atau tidak di DB Anda
                         ->whereIn('surat_id', $suratIds)->delete();
 
-                    DB::table('surat_pengantar_skcks')
+                    DB::table('surat_pengantar_skck')
                         ->whereIn('surat_id', $suratIds)->delete();
 
                     DB::table('surat_keterangan_kelahiran')
