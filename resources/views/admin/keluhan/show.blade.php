@@ -138,7 +138,7 @@
                                 <option value="pending" {{ ($keluhan->status == 'pending' || $keluhan->status == 'menunggu') ? 'selected' : '' }}>Menunggu (Belum Dibaca)</option>
                                 <option value="diproses" {{ ($keluhan->status == 'proses' || $keluhan->status == 'diproses') ? 'selected' : '' }}>Sedang Diproses</option>
                                 <option value="selesai" {{ $keluhan->status == 'selesai' ? 'selected' : '' }}>Selesai (Masalah Teratasi)</option>
-                                <option value="ditolak" {{ $keluhan->status == 'ditolak' ? 'selected' : '' }}>Tolak Laporan</option>
+                                {{-- <option value="ditolak" {{ $keluhan->status == 'ditolak' ? 'selected' : '' }}>Tolak Laporan</option> --}}
                             </select>
                         </div>
 
