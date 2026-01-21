@@ -86,18 +86,18 @@ class SuratController extends Controller
             $detail = $detailRaw ? (array) $detailRaw : null;
 
             // ============================================================
-            // 🔥 [PERUBAHAN 1] QR CODE MODE OFFLINE (DATA TEKS LANGSUNG) 🔥
-            // Data disimpan sebagai teks agar bisa discan tanpa internet
+            // 🔥 PERBAIKAN: ISI QR CODE SEKARANG ADALAH LINK VALIDASI 🔥
             // ============================================================
-            $kontenQR  = "PEMERINTAH DESA SURUH\n";
-            $kontenQR .= "DOKUMEN SAH & VALID\n\n";
-            $kontenQR .= "Jenis : " . $surat->jenis_surat . "\n";
-            $kontenQR .= "Nomor : " . $nomorSurat . "\n";
-            $kontenQR .= "Nama  : " . ($surat->user->name ?? '-') . "\n";
-            $kontenQR .= "NIK   : " . ($surat->user->biodata->nik ?? '-') . "\n";
-            $kontenQR .= "Tgl   : " . Carbon::parse($surat->updated_at)->format('d-m-Y');
+            
+            // Generate URL ke route validasi public
+            $urlValidasi = route('surat.validasi', $surat->id);
 
-            $qrSvg = QrCode::format('svg')->size(120)->margin(1)->generate($kontenQR);
+            // Masukkan URL ke dalam QR Code
+            $qrSvg = QrCode::format('svg')
+                        ->size(120)
+                        ->margin(1)
+                        ->generate($urlValidasi);
+
             $qrBase64 = base64_encode($qrSvg);
             // ============================================================
 
@@ -152,18 +152,17 @@ class SuratController extends Controller
         $detail = $detailRaw ? (array) $detailRaw : null;
 
         // ============================================================
-        // 🔥 [PERUBAHAN 2] QR CODE MODE OFFLINE (DATA TEKS LANGSUNG) 🔥
-        // Sama seperti di atas, tapi perhatikan variabel nomor suratnya
+        // 🔥 PERBAIKAN: ISI QR CODE SEKARANG ADALAH LINK VALIDASI 🔥
         // ============================================================
-        $kontenQR  = "PEMERINTAH DESA SURUH\n";
-        $kontenQR .= "DOKUMEN SAH & VALID\n\n";
-        $kontenQR .= "Jenis : " . $surat->jenis_surat . "\n";
-        $kontenQR .= "Nomor : " . $surat->nomor_surat . "\n"; // <-- Ambil dari database
-        $kontenQR .= "Nama  : " . ($surat->user->name ?? '-') . "\n";
-        $kontenQR .= "NIK   : " . ($surat->user->biodata->nik ?? '-') . "\n";
-        $kontenQR .= "Tgl   : " . Carbon::parse($surat->updated_at)->format('d-m-Y');
+        
+        // Generate URL ke route validasi public
+        $urlValidasi = route('surat.validasi', $surat->id);
 
-        $qrSvg = QrCode::format('svg')->size(120)->margin(1)->generate($kontenQR);
+        $qrSvg = QrCode::format('svg')
+                    ->size(120)
+                    ->margin(1)
+                    ->generate($urlValidasi);
+
         $qrBase64 = base64_encode($qrSvg);
         // ============================================================
 
@@ -177,8 +176,7 @@ class SuratController extends Controller
         return $pdf->stream('SURAT_' . $surat->id . '.pdf');
     }
 
-    // ... (Helper Functions & kirimEmail TETAP SAMA SEPERTI SEBELUMNYA) ...
-    // Saya singkat agar tidak terlalu panjang, tapi PASTIKAN Anda tidak menghapus fungsi helper di bawah ini.
+    // ... (Helper Functions & kirimEmail TIDAK BERUBAH) ...
     
     private function getDetailData($jenisSurat, $id) {
         $map = [

@@ -21,19 +21,23 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    {{-- Tanggal --}}
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Transaksi</label>
-                        
-                        <input 
-                            type="date" 
-                            name="tanggal_transaksi" 
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight bg-gray-200 cursor-not-allowed"
-                            value="{{ date('Y-m-d') }}" 
-                            readonly
-                        >                   
-                        <p class="text-xs text-red-500 mt-1">*Tanggal otomatis terisi hari ini dan tidak dapat diubah.</p>
-                    </div>
+                    {{-- TANGGAL TRANSAKSI --}}
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Transaksi</label>
+                            
+                            {{-- 🔥 UBAH BAGIAN INI SAJA 🔥 --}}
+                            {{-- 1. name diganti 'tanggal' (biar sama kayak di database) --}}
+                            {{-- 2. value format d-m-Y (biar enak dibaca manusia) --}}
+                            {{-- 3. Pakai 'readonly' (JANGAN disabled) --}}
+                            <input 
+                                type="text" 
+                                name="tanggal" 
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight bg-gray-200 cursor-not-allowed"
+                                value="{{ date('d-m-Y') }}" 
+                                readonly
+                            >                   
+                            <p class="text-xs text-red-500 mt-1">*Tanggal otomatis terisi hari ini.</p>
+                        </div>
 
                     {{-- Kategori (Input Text Sederhana) --}}
                     <div>

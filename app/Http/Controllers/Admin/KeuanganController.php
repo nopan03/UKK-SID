@@ -34,26 +34,42 @@ class KeuanganController extends Controller
      * Menyimpan transaksi baru ke database.
      */
    public function store(Request $request)
-{
-    // 1. Validasi Input Lainnya (Tanggal tidak perlu divalidasi karena kita set manual)
-    $request->validate([
-        'jenis_transaksi' => 'required',
-        'nominal' => 'required|numeric',
-        'keterangan' => 'required',
-    ]);
+    {
+        // 1. Validasi
+        // Kita sesuaikan dengan 'name' yang ada di View Mas tadi
+        $request->validate([
+            'tanggal'    => 'required',             // Wajib ada (makanya view gak boleh disabled)
+            'kategori'   => 'required|string',
+            'jenis'      => 'required|in:pemasukan,pengeluaran',
+            'jumlah'     => 'required|numeric|min:1', // Di View namanya 'jumlah', bukan 'nominal'
+            'keterangan' => 'required|string',
+        ]);
 
-    // 2. Simpan Data
-    Keuangan::create([
-        'jenis_transaksi' => $request->jenis_transaksi,
-        'nominal'         => $request->nominal,
-        'keterangan'      => $request->keterangan,
-        'tanggal_transaksi' => now(), 
-        
-    ]);
-    
+        // 2. Format Tanggal (Ubah dari 20-01-2026 jadi 2026-01-20 buat Database)
+        try {
+            $tanggalFix = \Carbon\Carbon::createFromFormat('d-m-Y', $request->tanggal)->format('Y-m-d');
+        } catch (\Exception $e) {
+            $tanggalFix = now()->format('Y-m-d');
+        }
 
-    return redirect()->back()->with('success', 'Data keuangan berhasil disimpan!');
-}
+        // 3. Simpan Data (Pakai Model yang Benar: KeuanganDesa)
+        // 🔥 Perhatikan nama kolom sebelah kiri, itu nama kolom di Database Mas 🔥
+        KeuanganDesa::create([
+            'tanggal'    => $tanggalFix,
+            'kategori'   => $request->kategori,
+            'jenis'      => $request->jenis,       // Database kolomnya 'jenis', bukan 'jenis_transaksi'
+            'jumlah'     => $request->jumlah,      // Database kolomnya 'jumlah', bukan 'nominal'
+            'keterangan' => $request->keterangan,
+            'user_id'    => auth()->id(),          // Biar tahu siapa admin yang input
+        ]);
+
+        // 4. Catat Log (Opsional, pemanis)
+        $rupiah = number_format($request->jumlah, 0, ',', '.');
+        LogAktivitas::catat("Menambahkan Keuangan: $request->kategori (Rp $rupiah)");
+
+        return redirect()->route('admin.keuangan.index')
+            ->with('success', 'Data keuangan berhasil disimpan!');
+    }
 
     /**
      * Menampilkan form untuk mengedit transaksi.
