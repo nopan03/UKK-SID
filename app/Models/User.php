@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Penduduk; // Pastikan ini ada
+use App\Models\Penduduk; 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -17,13 +17,14 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-
     protected $fillable = [
         'name',
         'nik',
         'email',
         'password',
         'otp',
+        'role',                 // 🔥 WAJIB DITAMBAH (Supaya bisa simpan 'pengunjung')
+        'status_kependudukan',  // 🔥 WAJIB DITAMBAH (Supaya bisa simpan statusnya)
     ];
 
     /**

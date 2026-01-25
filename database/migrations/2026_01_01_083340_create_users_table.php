@@ -16,7 +16,12 @@ return new class extends Migration
             $table->string('name')->unique('username');
             $table->string('email')->nullable()->unique('email');
             $table->string('password');
-            $table->enum('role', ['admin', 'warga'])->nullable()->default('warga');
+            
+            // 🔥 PERUBAHAN DI SINI 🔥
+            // Dulu: Enum (Kaku) -> Sekarang: String (Fleksibel)
+            // Bisa menampung: 'admin', 'warga', 'pengunjung', 'pendatang', dll.
+            $table->string('role', 50)->nullable()->default('warga');
+            
             $table->string('nik')->nullable()->unique('nik');
             $table->dateTime('created_at')->nullable()->useCurrent();
             $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();

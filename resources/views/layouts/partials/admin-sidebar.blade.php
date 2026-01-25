@@ -30,6 +30,24 @@
             <span>Data Warga</span>
         </a>
 
+        {{-- 🔥 MENU VERIFIKASI PENDATANG (PINDAH KE SINI) 🔥 --}}
+        @php
+            // Hitung notifikasi pendatang langsung di sini
+            $notifPendatang = \App\Models\LaporDiri::where('status', 'menunggu')->count();
+        @endphp
+        <a href="{{ route('admin.pendatang.index') }}" 
+           class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.pendatang.*') ? 'bg-green-700 text-white shadow-sm' : 'text-green-100 hover:bg-green-800 hover:text-white' }}">
+            <i class="ti ti-user-check text-xl mr-3"></i>
+            <span class="flex-1">Verifikasi Pendatang</span>
+            
+            {{-- Badge Notifikasi Pendatang --}}
+            @if($notifPendatang > 0)
+                <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    {{ $notifPendatang }}
+                </span>
+            @endif
+        </a>
+
         {{-- Berita --}}
         <a href="{{ route('admin.berita.index') }}" 
            class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.berita.*') ? 'bg-green-700 text-white shadow-sm' : 'text-green-100 hover:bg-green-800 hover:text-white' }}">
@@ -50,7 +68,7 @@
         {{-- DROPDOWN PERMOHONAN SURAT --}}
         <div x-data="{ open: {{ request()->routeIs('admin.surat.*') ? 'true' : 'false' }} }">
             
-            {{-- 1. TOMBOL INDUK --}}
+            {{-- TOMBOL INDUK --}}
             <button @click="open = !open" type="button" 
                 class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.surat.*') ? 'bg-green-800 text-white' : 'text-green-100 hover:bg-green-800 hover:text-white' }}">
                 
@@ -58,23 +76,19 @@
                     <i class="ti ti-mail-opened text-xl mr-3"></i>
                     <span>Permohonan Surat</span>
                     
-                    {{-- 🔥 LOGIKA BARU DISINI 🔥 --}}
-                    {{-- Tampilkan Total HANYA JIKA dropdown tertutup (!open) --}}
+                    {{-- Badge Total Surat --}}
                     @if(isset($totalSurat) && $totalSurat > 0)
                         <span x-show="!open" 
                               class="ml-auto bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                             {{ $totalSurat }}
                         </span>
                     @endif
-                    {{-- 🔥 AKHIR LOGIKA 🔥 --}}
-
                 </div>
                 
-                {{-- Ikon Panah (Ikut menghilang/bergeser rapi) --}}
                 <svg x-show="open || {{ $totalSurat ?? 0 }} == 0" class="w-4 h-4 transition-transform duration-200 ml-auto" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
 
-            {{-- 2. SUB-MENU (Anak Surat) --}}
+            {{-- SUB-MENU (Anak Surat) --}}
             <div x-show="open" x-collapse class="space-y-1 mt-1 pl-11 pr-2">
                 <a href="{{ route('admin.surat.index') }}" 
                    class="block px-3 py-2 rounded-md text-sm transition-colors duration-200 {{ !request()->has('jenis') && request()->routeIs('admin.surat.index') ? 'text-white bg-green-700 font-semibold' : 'text-green-200 hover:text-white hover:bg-green-800' }}">
@@ -98,30 +112,28 @@
                 @foreach($jenisSurat as $key => $label)
                     <a href="{{ route('admin.surat.index', ['jenis' => $key]) }}" 
                        class="flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors duration-200 {{ request()->input('jenis') == $key ? 'text-white bg-green-700 font-semibold' : 'text-green-200 hover:text-white hover:bg-green-800' }}">
-                       
-                       <span>{{ $label }}</span>
+                        
+                        <span>{{ $label }}</span>
 
-                       {{-- Badge Per Jenis (Hanya muncul saat dropdown terbuka) --}}
-                       @if(isset($notifPerJenis[$key]) && $notifPerJenis[$key] > 0)
-                           <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                               {{ $notifPerJenis[$key] }}
-                           </span>
-                       @endif
-
+                        @if(isset($notifPerJenis[$key]) && $notifPerJenis[$key] > 0)
+                            <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                                {{ $notifPerJenis[$key] }}
+                            </span>
+                        @endif
                     </a>
                 @endforeach
             </div>
         </div>
 
-        {{-- Keluhan Warga (Tetap Pakai Badge Total) --}}
+        {{-- Keluhan Warga --}}
         <a href="{{ route('admin.keluhan.index') ?? '#' }}" 
-           class="flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 text-green-100 hover:bg-green-800 hover:text-white">
+           class="flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.keluhan.*') ? 'bg-green-700 text-white shadow-sm' : 'text-green-100 hover:bg-green-800 hover:text-white' }}">
             <div class="flex items-center">
                 <i class="ti ti-message-exclamation text-xl mr-3"></i>
                 <span>Keluhan Warga</span>
             </div>
             
-            {{-- Badge Keluhan (Tanpa Animasi) --}}
+            {{-- Badge Keluhan --}}
             @if(isset($notifKeluhan) && $notifKeluhan > 0)
                 <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                     {{ $notifKeluhan }}
@@ -134,7 +146,7 @@
 
         {{-- Log Aktivitas --}}
         <a href="{{ route('admin.log.index') }}" 
-           class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 text-green-100 hover:bg-green-800 hover:text-white">
+           class="flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.log.*') ? 'bg-green-700 text-white shadow-sm' : 'text-green-100 hover:bg-green-800 hover:text-white' }}">
             <i class="ti ti-activity-heartbeat text-xl mr-3"></i>
             <span>Log Aktivitas</span>
         </a>

@@ -12,76 +12,66 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Mail;
+// use App\Rules\Recaptcha; // ❌ HAPUS ATAU KOMENTAR INI
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
     public function create()
     {
         return view('auth.register');
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
-        // 1. VALIDASI INPUT (DIPERBAIKI)
+        // 1. VALIDASI INPUT (Tanpa Recaptcha)
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:users,name'],
-            
-            // 🔥 UBAH INI: Pakai 'digits:16' dan 'numeric'
             'nik' => ['required', 'numeric', 'digits:16', 'unique:users,nik'], 
-            
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            // ❌ BAGIAN RECAPTCHA SUDAH SAYA BUANG DARI SINI
         ], [
-            // --- TAMBAHAN BAHASA INDONESIA LENGKAP ---
             'name.required' => 'Nama wajib diisi.',
-            'name.unique' => 'Nama lengkap ini sudah memiliki akun.',
-            
+            'name.unique' => 'Nama ini sudah dipakai.',
             'nik.required' => 'NIK wajib diisi.',
             'nik.numeric' => 'NIK harus berupa angka.',
-            'nik.digits' => 'NIK harus berjumlah pas 16 digit.',
-            'nik.unique' => 'NIK ini sudah terdaftar. Silakan login saja.',
-            
+            'nik.digits' => 'NIK harus 16 digit.',
+            'nik.unique' => 'NIK ini sudah terdaftar. Silakan login.',
             'email.required' => 'Email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email ini sudah digunakan.',
-            
-            'password.required' => 'Password wajib diisi.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
-            'password.min' => 'Password minimal harus 8 karakter.',
+            'email.unique' => 'Email sudah terdaftar.',
         ]);
 
-        // 2. CEK APAKAH NIK ADA DI DATA PENDUDUK (DASHBOARD ADMIN)
+        // 2. LOGIKA PENENTUAN STATUS & ROLE
         $cekPenduduk = Penduduk::where('nik', $request->nik)->first();
 
-        if (!$cekPenduduk) {
-            // Jika NIK tidak ditemukan di tabel Penduduk
-            return back()->withErrors(['nik' => 'NIK Anda belum terdaftar di Data Desa. Silakan hubungi Admin Desa.'])->withInput();
+        // Default: Anggap dia PENDATANG
+        $roleUser = 'pengunjung'; 
+        $labelStatus = 'Warga Pendatang'; 
+
+        // Jika Ternyata NIK-nya Ada (Warga Asli)
+        if ($cekPenduduk) {
+            $roleUser = 'warga';
+            $labelStatus = 'Warga Asli'; 
         }
 
-        // ============================================================
-        // 🔥 FITUR BARU: GENERATE OTP
-        // ============================================================
+        // 3. GENERATE OTP
         $otpCode = rand(100000, 999999);
 
-        // 3. SIMPAN USER BARU + KODE OTP
+        // 4. SIMPAN USER
         $user = User::create([
             'name' => $request->name,
             'nik' => $request->nik,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'warga', // Default role
-            'otp' => $otpCode, // Simpan kode OTP ke database
+            
+            // Variabel dinamis dari logika di atas
+            'role' => $roleUser,            
+            'status_kependudukan' => $labelStatus, 
+            
+            'otp' => $otpCode,
         ]);
 
-        // 4. KIRIM EMAIL OTP
+        // 5. KIRIM EMAIL OTP
         try {
             $pesan = "Halo $user->name,\n\nTerima kasih telah mendaftar.\nKode verifikasi (OTP) Anda adalah:\n\n$otpCode\n\nMasukkan kode ini di website untuk mengaktifkan akun.";
             
@@ -90,15 +80,11 @@ class RegisteredUserController extends Controller
                         ->subject('Kode Verifikasi OTP - Desa Suruh');
             });
         } catch (\Exception $e) {
-            // Opsional: Biarkan kosong atau log error jika email gagal (agar user tetap terbuat)
+            // Abaikan error email
         }
 
-        // 5. TRIGGER EVENT (Opsional, bawaan Laravel)
+        // 6. LOGIN & REDIRECT
         event(new Registered($user));
-
-        // 6. LOGIN OTOMATIS & LEMPAR KE HALAMAN INPUT OTP
-        // Kita tidak redirect ke Login, tapi langsung Login-kan user
-        // Namun karena belum verified, middleware akan menahan dia di halaman OTP nanti.
         Auth::login($user);
 
         return redirect()->route('otp.verify');

@@ -36,11 +36,6 @@
                     deskripsi: 'Untuk pembuatan Akta Kelahiran bayi di Disdukcapil.',
                     syarat: ['Surat Lahir Bidan/RS (Asli)', 'KTP & KK Orang Tua', 'Buku Nikah Orang Tua']
                 },
-                'Surat Keterangan Kematian': {
-                    icon: 'ti-activity-heartbeat',
-                    deskripsi: 'Untuk pembuatan Akta Kematian atau klaim waris/asuransi.',
-                    syarat: ['Surat Kematian Dokter (jika ada)', 'KTP & KK Almarhum', 'KTP Pelapor']
-                },
                 'Surat Keterangan Pindah': {
                     icon: 'ti-truck-delivery',
                     deskripsi: 'Surat pengantar untuk warga yang akan pindah domisili ke luar daerah.',
