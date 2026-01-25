@@ -2,3 +2,19 @@
 !private/
 !public/
 !.gitignore
+
+
+//firebase_credentials.json letakkan di bawah file gitignore ini
+{
+  "type": "service_account",
+  "project_id": "sid-logs",
+  "private_key_id": "9a013ceb60a03f52f252a5633f4e39cab249267c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCMOJUWr2VbbHku\ngZh6D5488N7em05vG5aWavmOTPZYB2ED49OLUPM0rhwV76/xTxvPXNtTt4AOTl/h\nV5qqnMiTdnj8JkUNNUuvnsw7DtR4PJwJ3ovXAWcqDzA2poIobtIEWGG/9xQ6FeHJ\nO3dCcNb9d/aomGCQe4sCDnbyg3LY2M9U7xOfwhPrbdPpSNlnS3Et8Ebeq2rV7O6w\ngIIS6PW9BIorEFNYG6ChS78xNgliuuS4VrJOaduFxCEIWSJnKLmBfUc9NEe3rqyG\noCd6htJpMcY9Vl9qrT1UT7LUfj+8W+W1pAZm4iIJjZPX13HiM7gkPHwXlSd+k5uj\nfKYceIeVAgMBAAECggEABG8moc4yDU/TF1onJ43a9GvA2RKiuEvU3hTHTCjiiUO/\n5pt7vVYRZIjC1tKawm28wBQ3wYA6kpAZ2gg97ENaM7WXpKKBm9zIfR3K1X+zqknc\nqlupLBCGixyhD4Hv1EPa42wTFB9zqB4mPlK8+rMA37+Y41mgzPjeCQRKubmhEYPh\n/CHshgRAzR+GjunUDUO74/y2fwPWI6GBxTo0f2PiGrCbkN/kiTzUaut1FHx4LNS6\nTfPjxEtj9iGKqVSGnsLxD5w0hfIPA00CiJR54VP44Mdr2t/1hg1e3QMxBgW92uoe\n6oR3lJWurXZZdiIRuYej3zTvIdkPL9ot98yU9Z6C4QKBgQC/4StQtgSm2R/XvoWD\nQFUI/gDIxGF23V7NR0QFCe3a+0ITqOT/IjUym8n8furX9OLFf+iOpjlr39sliro2\nZZPerh7CMm1PiIDIjgh6un3vBKECOvbRAQb+6NCc5YNxtwrAQqPigh5AYLbOkzOB\nxIAV0aAbfI8cnrhPUAnIc2k9IQKBgQC7FCZ/+Xxr+HzCv7rZOOMFXMi/Z96ipbfq\ngIKryUCoheUJK2Kc3dSdP2OcnSEwJd0QWCXJ4oj6+ODgoZL7QJ6swyVUPFlUOjSV\n8OgDxVVogyh9dTd0S3FuDrSEz1sHHSff77jDCiW6neP1GKcvTwAPLy3LWmsxA8QL\neU6kKVEn9QKBgAeBA9OlOqtXxHIIhmoqoui2Hku7umAOqj128wcLa1zsBJqGOWZs\n7Q2soAqa4A5QCmpU5UBm6cn5ODXQphWohU7pGlTX6gR5PygYveYm0vP9B1rx+WMV\nGjPv4PCx3SEeWnJIaOZb1lkILz4G7bW+fI/d4dgRV/tzjZu0cp1/PfdhAoGBAIXQ\nzhEwRf19StCLEH4coNbPHZE8HRY+b6W/srhqRmPFEqVScUE/s7ufAgOeqYSlMNFm\nG/GiptTOfRxwtpAeEuIE3Ii6ejMzRzYRkgRQfN07JBVJaRc4d7R/tERjhfs6sbEO\n6hwo///SvKIutjeyzJoP5zPUQ2RWCz8h0EzAeRqZAoGABYo+gKA5hf1dm8ESQ1+r\nNP7390bhtcAjCPuAUiNQh+FSLJPkiWA33/1Yh5tSrA3sVCMxyXdnUiL/NOdxGZiT\nMCChtKvT8hXsnLw9xjhpD6NYV37hq6S/AL7pNPz9ER5GNsEeGPTYhBXFW54mO2Kw\nzn1+H46JL8eKkfZIc0GXFPQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@sid-logs.iam.gserviceaccount.com",
+  "client_id": "111781004494709235750",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40sid-logs.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
